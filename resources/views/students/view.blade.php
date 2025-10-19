@@ -1,0 +1,20 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Student: {{ $student->name }}</h1>
+
+    <dl>
+        <dt>ID</dt>
+        <dd>{{ $student->id }}</dd>
+
+        <dt>Name</dt>
+        <dd>{{ $student->name }}</dd>
+
+        <dt>Email</dt>
+        <dd>{{ $student->email }}</dd>
+    </dl>
+
+    <p><a href="{{ route('students.index') }}">Back to list</a> | <a href="{{ route('students.edit', $student->id) }}">Edit</a></p>
+</div>
+@endsection
