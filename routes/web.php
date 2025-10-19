@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,3 +18,9 @@ Route::get('/', function () {
                 Route::post('/login', 'authenticate')->name('authenticate');
                 Route::post('/logout', 'logout')->name('logout');
             });
+
+// Users listing and view (requires authenticated user)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+});
