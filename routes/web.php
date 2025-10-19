@@ -10,6 +10,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/home', function () {
+    return view('layouts.indexs.home');
+});
+
  Route::controller(LoginController::class)
             ->prefix('auth')
             ->group(static function (): void {
