@@ -83,6 +83,8 @@ class LoginController extends Controller
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
+    // default role for self-registered users
+    $user->role = 'STUDENT';
         $user->save();
 
         // Log the user in
