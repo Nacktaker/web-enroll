@@ -20,7 +20,7 @@
             <tbody>
                 @foreach($users as $u)
                     <tr>
-                        <td>{{ $u->id }}</td>
+                        <td><a href="{{ roote=('users.view') }}">{{ $u->id }}</a></td>
                         <td>{{ $u->name }}</td>
                         <td>{{ $u->email }}</td>
                         <td>{{ $u->created_at->format('Y-m-d') }}</td>

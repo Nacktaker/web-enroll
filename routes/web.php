@@ -21,6 +21,10 @@ Route::get('/', function () {
 
 // Users listing and view (requires authenticated user)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/users', [UserController::class, 'list'])->name('users.list');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 });
