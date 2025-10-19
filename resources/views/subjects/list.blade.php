@@ -21,21 +21,21 @@
         </thead>
 
         <tbody>
-            @foreach ($products as $product)
+            @foreach ($subjects as $subject)
                 <tr>
                     <td>
                         <a href="{{ route('subjects.view', [
                             'subject' => $subject->subject_id,
                         ]) }}"
                             class="app-cl-code">
-                            {{ $subject->subject }}
+                            {{ $subject->subject_id }}
                         </a>
                     </td>
                     <td>{{ $subject->subject_name }}</td>
-                    <td>{{ $subject->room }}</td>
-                    <td>{{ $subject->time }}</td>
-                    <td>{{ $subject->teacher_firstname }}</td>
-                    <td>{{ $subject->teacher_lastname }}</td>
+                    <td>{{ $subject->subject_place }}</td>
+                    <td>{{ $subject->subject_time }}</td>
+                    <td>{{ $subject->teacher_first_name }}</td>
+                    <td>{{ $subject->teacher_last_name }}</td>
                 </tr>
             @endforeach
         </tbody>
