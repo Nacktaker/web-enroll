@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
@@ -13,6 +13,7 @@
 			</ul>
 		</div>
 	@endif
+	
 
 	<form method="POST" action="{{ route('users.store') }}">
 		@csrf

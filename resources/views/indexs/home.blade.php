@@ -21,12 +21,12 @@
 <div class="controls">
     <button class="control-btn">ช่วงเวลารับ: {{ $startDate }}</button>
     <button class="control-btn">ช่วงเวลาสิ้นสุด: {{ $endDate }}</button>
-    <button class="search-btn">เพิ่ม User</button>
+    <button class="search-btn"><a href="{{ route('users.adduser') }}">เพิ่ม User</a></button>
 </div>
 
 <div class="users">
-    <button class="user-box">นักศึกษา</button>
-    <button class="user-box">อาจารย์</button>
-    <button class="user-box"></button>
+    <button class="user-box"><a href="{{ route('students.list') }}">นักศึกษา</a></button>
+    <button class="user-box"><a href="{{ route('teachers.list') }}">อาจารย์</a></button>
+    <button class="user-box"><a href="{{ route('users.list') }}">ผู้ใช้x</a></button>
 </div>
 @endsection

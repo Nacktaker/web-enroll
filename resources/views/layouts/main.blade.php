@@ -13,7 +13,7 @@
         <nav class="nav">
             <ul>
                 <li><a href="#">เพิ่มวิชาเรียน</a></li>
-                <li><a href="#">ดูวิชาที่เปิดสอบ</a></li>
+                <li><a href="{{ route('subjects.list') }}">ดูวิชาที่เปิดสอบ</a></li>
                 <li><a href="#">ยืนยันลงทะเบียน</a></li>
                 <li><a href="#">ยืนยันการตรวจสอบ</a></li>
             </ul>

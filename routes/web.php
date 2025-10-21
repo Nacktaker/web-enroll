@@ -5,13 +5,14 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/home', function () {
-    return view('layouts.indexs.home');
+    return view('indexs.home');
 });
 
  Route::controller(LoginController::class)
@@ -26,27 +27,35 @@ Route::get('/home', function () {
             });
 
 // Users listing and view (requires authenticated user)
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth'])->group(function () {
     Route::get('/users', [UserController::class, 'list'])->name('users.list');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.adduser');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     
     // Teachers
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.list');
     Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
     Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
     Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
     Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
 
+    //Subject
+    Route::controller(SubjectController::class)
+    ->prefix('/subjects')
+    ->name('subjects.')
+    ->group(static function (): void {
+        Route::get('', 'list')->name('list');
+        Route::get('/{subject}', 'view')->name('view');
+    });
     // Students
-    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('/students', [StudentController::class, 'index'])->name('students.list');
     Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
     Route::post('/students', [StudentController::class, 'store'])->name('students.store');
     Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
     Route::get('/students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
-});
+//});
