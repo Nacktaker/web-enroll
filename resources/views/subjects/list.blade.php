@@ -2,6 +2,34 @@
     'title' => 'Subjects List',
     'mainClasses' => ['app-ly-max-width'],
 ])
+@section('header')
+    <search>
+        <form action="{{ route('subjects.list') }}" method="get" class="app-cmp-search-form">
+            <div class="app-cmp-form-detail">
+                <label for="app-criteria-term">Search</label>
+                <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
+            </div>
+
+            <div class="app-cmp-form-actions">
+                <button type="submit" class="primary">Search</button>
+                <a href="{{ route('subjects.list') }}">
+                    <button type="button" class="accent">X</button>
+                </a>
+            </div>
+        </form>
+    </search>
+
+    <div class="app-cmp-links-bar">
+        <nav>
+            <ul class="app-cmp-links">
+                <li>
+                    <a href="{{ route('subjects.create-form') }}">New Subjects</a>
+                </li>
+            </ul>
+        </nav>
+    
+    </div>
+@endsection
 
 @section('content')
     <table class="app-cmp-data-list">

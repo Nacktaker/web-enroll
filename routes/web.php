@@ -19,9 +19,15 @@ Route::controller(LoginController::class)
                 Route::post('/logout', 'logout')->name('logout');
             });
 Route::controller(SubjectController::class)
-    ->prefix('/subjects')
-    ->name('subjects.')
-    ->group(static function (): void {
-        Route::get('', 'list')->name('list');
-        Route::get('/{subject}', 'view')->name('view');
+    ->prefix('subjects') // URL ทั้งหมดจะขึ้นต้นด้วย /subjects
+    ->name('subjects.')   // ชื่อ Route ทั้งหมดจะขึ้นต้นด้วย subjects.
+    ->group(static function () {
+        Route::get('/', action: 'list')->name('list');
+        Route::get('/create', action: 'showCreateForm')->name('create-form');
+        Route::post('/', action: 'create')->name('create');
+        Route::get('/{subject}', action: 'view')->name('view');
+        Route::get('/{subject}/edit', action: 'showUpdateForm')->name('show-update-form');
+        Route::post('/{subject}/update', action: 'update')->name('update'); // or Route::put(...)
+        Route::post('/{subject}/delete', action: 'delete')->name('delete'); // or Route::delete(...)
+
     });
