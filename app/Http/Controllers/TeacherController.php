@@ -59,4 +59,15 @@ class TeacherController extends Controller
 
         return redirect()->route('teachers.show', $teacher->id)->with('status', 'Teacher updated');
     }
+
+    /**
+     * Remove the specified teacher.
+     */
+    public function destroy($id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        $teacher->delete();
+
+        return redirect()->route('teachers.index')->with('status', 'Teacher deleted');
+    }
 }

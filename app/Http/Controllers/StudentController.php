@@ -59,4 +59,15 @@ class StudentController extends Controller
 
         return redirect()->route('students.show', $student->id)->with('status', 'Student updated');
     }
+
+    /**
+     * Remove the specified student.
+     */
+    public function destroy($id)
+    {
+        $student = Student::findOrFail($id);
+        $student->delete();
+
+        return redirect()->route('students.index')->with('status', 'Student deleted');
+    }
 }

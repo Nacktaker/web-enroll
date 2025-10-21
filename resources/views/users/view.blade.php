@@ -19,5 +19,10 @@
     </dl>
 
     <p><a href="{{ url('/users') }}">Back to list</a></p>
+    <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" style="color:#c00;">Delete User</button>
+    </form>
 </div>
 @endsection

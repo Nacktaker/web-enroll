@@ -10,6 +10,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Public account creation page (Thai: สร้างบัญชี)
+Route::get('/create', function () {
+    return view('users.create');
+});
+
+Route::post('/create', [\App\Http\Controllers\RegistrationController::class, 'store']);
+
  Route::controller(LoginController::class)
             ->prefix('auth')
             ->group(static function (): void {
@@ -29,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     
     // Teachers
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
@@ -37,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
     Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
+    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
     // Students
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
@@ -45,4 +54,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
     Route::get('/students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
+    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 });
