@@ -1,3 +1,4 @@
+
 @extends('subjects.main', [
     'title' => $subject->subject_name,
 ])

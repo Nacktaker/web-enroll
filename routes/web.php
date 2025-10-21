@@ -11,6 +11,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Public account creation page (Thai: สร้างบัญชี)
+Route::get('/create', function () {
+    return view('users.create');
+});
+
+Route::post('/create', [\App\Http\Controllers\RegistrationController::class, 'store']);
+
 Route::get('/home', function () {
     return view('indexs.home');
 });
@@ -34,6 +41,7 @@ Route::get('/home', function () {
     Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     
     // Teachers
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.list');
@@ -42,15 +50,19 @@ Route::get('/home', function () {
     Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
     Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
+    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
     //Subject
-    Route::controller(SubjectController::class)
-    ->prefix('/subjects')
+
+// Group route สำหรับ subject
+Route::controller(SubjectController::class)
+    ->prefix('subjects')
     ->name('subjects.')
-    ->group(static function (): void {
-        Route::get('', 'list')->name('list');
-        Route::get('/{subject}', 'view')->name('view');
+    ->group(function () {
+        Route::get('/', 'list')->name('list');            // Route /subjects
+        Route::get('/{subject}', 'view')->name('view');    // Route /subjects/{subject}
     });
+
     // Students
     Route::get('/students', [StudentController::class, 'index'])->name('students.list');
     Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
@@ -58,4 +70,5 @@ Route::get('/home', function () {
     Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
     Route::get('/students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
-//});
+    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
+// });

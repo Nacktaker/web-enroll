@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -90,6 +91,23 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->route('users.view', $user->id)->with('status', 'User updated successfully.');
+    }
+
+    /**
+     * Remove the specified user.
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Prevent deleting the currently authenticated user
+        if (Auth::check() && Auth::id() === $user->id) {
+            return redirect()->route('users.view', $user->id)->with('status', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('users.list')->with('status', 'User deleted.');
     }
 }
             

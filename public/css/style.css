@@ -241,3 +241,186 @@ footer {
     color: #777;
     padding: 10px;
 }
+
+/* Base container */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: #111827;
+}
+
+/* Headings */
+.container h1 {
+    font-size: 28px;
+    margin-bottom: 24px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+thead {
+    background: #f3f4f6;
+}
+
+thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+tbody td {
+    padding: 12px 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #3730a3;
+}
+
+/* View page (dl) */
+dl {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+    margin-bottom: 24px;
+}
+
+dt {
+    font-weight: 600;
+    color: #374151;
+}
+
+dd {
+    margin: 0;
+    color: #111827;
+}
+
+/* Buttons & links */
+button, .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+}
+
+
+
+/* Back link */
+p a {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+p a:hover {
+    color: #3730a3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    dl {
+        grid-template-columns: 1fr;
+    }
+    table thead {
+        display: none;
+    }
+    table, tbody, tr, td {
+        display: block;
+        width: 100%;
+    }
+    tbody td {
+        padding: 10px 0;
+        border-top: none;
+        border-bottom: 1px solid #e5e7eb;
+        position: relative;
+        padding-left: 120px;
+    }
+    tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 100px;
+        font-weight: 600;
+        color: #374151;
+    }
+}
+
+.errors {
+    background: #ffe5e5;
+    border: 1px solid #ffb3b3;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    color: #cc0000;
+    padding-left: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-actions a {
+    padding: 10px 20px;
+    background: #ccc;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+}

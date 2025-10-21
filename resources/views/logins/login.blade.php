@@ -1,50 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
-
 <body>
-    <form action="{{ route('authenticate') }}" method="post">
-
+    <form action="{{ route('authenticate') }}" method="POST">
         @csrf
-        <label><h1>Login</h1></label>
+        <h1>LOGIN</h1>
 
-        <label>
+        {{-- แสดง error เมื่อ login ไม่ผ่าน --}}
+        @error('credentials')
+        <div role="alert">{{ $message }}</div>
+        @enderror
 
-            E-mail <input type="email" name="email" required />
+        <label for="email">E-mail</label>
+        <input id="email" type="email" name="email" placeholder="Enter your email" required>
 
-        </label><br />
-
-        <label>
-
-            Password <input type="password" name="password" required />
-
-        </label><br />
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Enter your password" required>
 
         <button type="submit">Login</button>
 
-        <a href="{{ url('auth/register') }}">Register</a>
-
-         <div class="app-cmp-notifications">
-
-            @error('credentials')
-
-            <div role="alert">
-
-                {{ $message }}
-
-            </div>
-
-            @enderror
-
-        </div>
-
+      
     </form>
 </body>
-
-
 </html>

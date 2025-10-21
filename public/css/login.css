@@ -1,0 +1,116 @@
+/* ====== Reset & Base ====== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Poppins", "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #f0f4ff, #dfe9ff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ====== Container ====== */
+form,
+.container {
+    background: #ffffff;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    width: 360px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover,
+.container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ====== Titles ====== */
+h1, h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* ====== Labels & Inputs ====== */
+label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4c8bf5;
+    box-shadow: 0 0 0 3px rgba(76, 139, 245, 0.15);
+}
+
+/* ====== Buttons ====== */
+button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #4c8bf5;
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+}
+
+button:hover {
+    background-color: #3975e5;
+}
+
+/* ====== Links ====== */
+a {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    text-decoration: none;
+    color: #4c8bf5;
+    font-weight: 500;
+    transition: color 0.25s ease;
+}
+
+a:hover {
+    color: #235adf;
+    text-decoration: underline;
+}
+
+/* ====== Error / Alert ====== */
+.errors,
+[role="alert"] {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 0.9rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 400px) {
+    form,
+    .container {
+        width: 90%;
+        padding: 1.5rem;
+    }
+}
