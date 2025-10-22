@@ -9,96 +9,80 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use Psr\Http\Message\ServerRequestInterface;
 
 class LoginController extends Controller
 {
-    function showLoginForm(): View
+    /**
+     * Show the login form.
+     */
+    public function login(): View
     {
         return view('logins.login');
     }
 
-    function showRegisterForm(): View
-    {
-        return view('logins.register');
-    }
-
-    function authenticate(ServerRequestInterface $request): RedirectResponse
-    {
-        // Get credentials from user
-        $validator = Validator::make(
-            $request->getParsedBody(),
-            [
-                'email' => 'required',
-                'password' => 'required',
-            ],
-        );
-
-        // Authenticate by using method attempt()
-        if (
-            $validator->passes() &&
-            Auth::attempt(
-                $validator->safe()->only(['email', 'password']),
-            )
-        ) {
-            // Regenerate the new session ID
-            session()->regenerate();
-
-            // Redirect to the requested URL or
-            // to route products.list if does not specify
-            return redirect()->intended(route('products.list'));
-        }
-
-        // If cannot authenticate redirect back to loginForm with error message
-        $validator
-            ->errors()
-            ->add(
-                'credentials',
-                'The provided credentials do not match our records.',
-            );
-
-        return redirect()
-            ->back()
-            ->withErrors($validator);
-    }
-
     /**
-     * Handle registration request.
+     * Authenticate user using email and password.
      */
-    function register(Request $request): RedirectResponse
+    public function authenticate(Request $request): RedirectResponse
     {
-        $data = $request->only(['name', 'email', 'password', 'password_confirmation']);
+        $data = $request->only(['email', 'password']);
 
         $validator = Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'email' => 'required|email',
+            'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $user = new User();
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->password = Hash::make($data['password']);
-    // default role for self-registered users
-    $user->role = 'STUDENT';
-        $user->save();
+        // Auto-create default admin if no users exist (optional)
+        if (User::count() === 0) {
+            User::create([
+                'firstname' => 'Somchai',
+                'lastname' => 'Admin',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('123456'),
+                'role' => 'admin',
+            ]);
+        }
+
+        $user = User::where('email', $data['email'])->first();
+
+        if (! $user) {
+            return redirect()->back()->withErrors(['credentials' => 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'])->withInput();
+        }
+
+        // If password in DB is not a bcrypt/argon hash, compare plain text and rehash
+        $dbPassword = $user->password;
+        $isHashed = is_string($dbPassword) && preg_match('/^\$(2y|2b|argon2)/', $dbPassword);
+
+        if ($isHashed) {
+            $ok = Hash::check($data['password'], $dbPassword);
+        } else {
+            // Legacy plaintext stored — compare directly and rehash on success
+            $ok = hash_equals($dbPassword, $data['password']);
+            if ($ok) {
+                $user->password = Hash::make($data['password']);
+                $user->save();
+            }
+        }
+
+        if (! $ok) {
+            return redirect()->back()->withErrors(['credentials' => 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'])->withInput();
+        }
 
         // Log the user in
         Auth::login($user);
+        session()->regenerate();
 
-        return redirect()->intended(route('products.list'));
+        return redirect('/dashboard');
     }
 
-    function logout(): RedirectResponse
+    public function logout(): RedirectResponse
     {
         Auth::logout();
         session()->invalidate();
-        
-        // Regenerate CSRF token
         session()->regenerateToken();
 
         return redirect()->route('login');

@@ -17,16 +17,11 @@ Route::get('/create', function () {
 
 Route::post('/create', [\App\Http\Controllers\RegistrationController::class, 'store']);
 
- Route::controller(LoginController::class)
-            ->prefix('auth')
-            ->group(static function (): void {
-                // name this route to login by default setting.
-                Route::get('/login', 'showLoginForm')->name('login');
-                Route::get('/register', 'showRegisterForm')->name('register');
-                Route::post('/register', 'register')->name('register.perform');
-                Route::post('/login', 'authenticate')->name('authenticate');
-                Route::post('/logout', 'logout')->name('logout');
-            });
+Route::prefix('auth')->group(function () {
+    Route::get('/login', [LoginController::class, 'login'])->name('login');
+    Route::post('/login', [LoginController::class, 'authenticate'])->name('authenticate');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+});
 
 // Users listing and view (requires authenticated user)
 Route::middleware(['auth'])->group(function () {

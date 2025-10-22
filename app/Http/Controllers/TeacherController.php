@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Teacher;
+use Override;
 
 class TeacherController extends Controller
 {
@@ -60,6 +61,8 @@ class TeacherController extends Controller
         return redirect()->route('teachers.show', $teacher->id)->with('status', 'Teacher updated');
     }
 
+
+    
     /**
      * Remove the specified teacher.
      */
@@ -70,4 +73,7 @@ class TeacherController extends Controller
 
         return redirect()->route('teachers.index')->with('status', 'Teacher deleted');
     }
+
+    
 }
+    

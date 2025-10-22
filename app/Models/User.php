@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -18,8 +19,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'firstname',
+        'lastname',
+        'email',
         'password',
+        'role',
     ];
 
     /**
@@ -46,5 +50,25 @@ class User extends Authenticatable
     {
 
         return $this->role === 'ADMIN';
+    }
+
+    /**
+     * Mutator to ensure passwords are hashed when set.
+     */
+    public function setPasswordAttribute($value)
+    {
+        if (empty($value)) {
+            $this->attributes['password'] = $value;
+            return;
+        }
+
+        // If value already looks like a bcrypt/argon hash, keep it as-is
+        if (is_string($value) && preg_match('/^\$(2y|2b|argon2)/', $value)) {
+            $this->attributes['password'] = $value;
+            return;
+        }
+
+        // Otherwise hash the plain text password
+        $this->attributes['password'] = Hash::make($value);
     }
 }
