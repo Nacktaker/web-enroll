@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
@@ -20,11 +20,11 @@
             <tbody>
                 @foreach($users as $u)
                     <tr>
-                        <td><a href="{{ roote=('users.view') }}">{{ $u->id }}</a></td>
+                        <td><a href="{{ route('users.view', $u->id) }}">{{ $u->id }}</a></td>
                         <td>{{ $u->name }}</td>
                         <td>{{ $u->email }}</td>
                         <td>{{ $u->created_at->format('Y-m-d') }}</td>
-                        <td><a href="{{ url('/users/'.$u->id) }}">View</a></td>
+                        <td><a href="{{ route('users.view', $u->id) }}">View</a></td>
                     </tr>
                 @endforeach
             </tbody>

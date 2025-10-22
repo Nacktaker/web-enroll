@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
@@ -18,12 +18,24 @@
         @csrf
         @method('PUT')
         <div>
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" value="{{ old('name', $teacher->name) }}" required />
+            <label for="firstname">First name</label>
+            <input id="firstname" name="firstname" type="text" value="{{ old('firstname', $teacher->user->firstname ?? '') }}" required />
+        </div>
+        <div>
+            <label for="lastname">Last name</label>
+            <input id="lastname" name="lastname" type="text" value="{{ old('lastname', $teacher->user->lastname ?? '') }}" required />
         </div>
         <div>
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" value="{{ old('email', $teacher->email) }}" required />
+            <input id="email" name="email" type="email" value="{{ old('email', $teacher->user->email ?? '') }}" required />
+        </div>
+        <div>
+            <label for="teacher_code">Teacher code</label>
+            <input id="teacher_code" name="teacher_code" type="text" value="{{ old('teacher_code', $teacher->teacher_code) }}" />
+        </div>
+        <div>
+            <label for="faculty">Faculty</label>
+            <input id="faculty" name="faculty" type="text" value="{{ old('faculty', $teacher->faculty) }}" />
         </div>
         <div style="margin-top:12px;">
             <button type="submit">Save</button>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
@@ -18,12 +18,32 @@
         @csrf
         @method('PUT')
         <div>
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" value="{{ old('name', $student->name) }}" required />
+            <label for="firstname">First name</label>
+            <input id="firstname" name="firstname" type="text" value="{{ old('firstname', $student->user->firstname ?? '') }}" required />
+        </div>
+        <div>
+            <label for="lastname">Last name</label>
+            <input id="lastname" name="lastname" type="text" value="{{ old('lastname', $student->user->lastname ?? '') }}" required />
         </div>
         <div>
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" value="{{ old('email', $student->email) }}" required />
+            <input id="email" name="email" type="email" value="{{ old('email', $student->user->email ?? '') }}" required />
+        </div>
+        <div>
+            <label for="stu_code">Student code</label>
+            <input id="stu_code" name="stu_code" type="text" value="{{ old('stu_code', $student->stu_code) }}" />
+        </div>
+        <div>
+            <label for="faculty">Faculty</label>
+            <input id="faculty" name="faculty" type="text" value="{{ old('faculty', $student->faculty) }}" />
+        </div>
+        <div>
+            <label for="department">Department</label>
+            <input id="department" name="department" type="text" value="{{ old('department', $student->department) }}" />
+        </div>
+        <div>
+            <label for="year">Year</label>
+            <input id="year" name="year" type="text" value="{{ old('year', $student->year) }}" />
         </div>
         <div style="margin-top:12px;">
             <button type="submit">Save</button>

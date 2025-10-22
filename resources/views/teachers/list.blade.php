@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 <div class="container">
     <h1>Teachers</h1>
-    <p><a href="{{ route('teachers.create') }}">Add Teacher</a></p>
+    <p><a href="{{ route('users.create') }}">Add Teacher</a></p>
 
     @if($teachers->isEmpty())
         <p>No teachers found.</p>
@@ -21,8 +21,8 @@
                 @foreach($teachers as $t)
                     <tr style="border-bottom:1px solid #f1f1f1;">
                         <td>{{ $t->id }}</td>
-                        <td>{{ $t->name }}</td>
-                        <td>{{ $t->email }}</td>
+                        <td>{{ $t->user ? $t->user->name : ($t->name ?? '') }}</td>
+                        <td>{{ $t->user ? $t->user->email : ($t->email ?? '') }}</td>
                         <td><a href="{{ route('teachers.show', $t->id) }}">View</a></td>
                     </tr>
                 @endforeach

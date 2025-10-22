@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <form method="POST" action="/create">
+    <form method="POST" action="{{ route('users.store') }}" id="create-user-form">
         @csrf
 
         <div>
@@ -38,6 +38,11 @@
         <div>
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
+        </div>
+
+        <div>
+            <label for="password_confirmation">Confirm Password</label>
+            <input type="password" id="password_confirmation" name="password_confirmation" required>
         </div>
 
         <div>
@@ -107,6 +112,8 @@
         var radios = document.querySelectorAll('input[name="role"]');
         radios.forEach(function(r) { r.addEventListener('change', updateVisibility); });
         updateVisibility();
+
+        // Form now posts firstname and lastname directly; no hidden name field needed.
     </script>
 
 </body>

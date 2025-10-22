@@ -76,7 +76,7 @@ class LoginController extends Controller
         Auth::login($user);
         session()->regenerate();
 
-        return redirect('/dashboard');
+        return redirect('/home');
     }
 
     public function logout(): RedirectResponse

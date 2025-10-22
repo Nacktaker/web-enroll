@@ -1,0 +1,426 @@
+body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(180deg, #fbfbfb 0%, #f1f5f9 100%);
+    color: #111827;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #ffffff 0%, #f3f6fb 100%);
+    padding: 14px 24px;
+    box-shadow: 0 2px 6px rgba(16,24,40,0.06);
+    border-bottom: 1px solid rgba(16,24,40,0.04);
+    gap: 16px;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0f172a;
+    letter-spacing: 0.4px;
+}
+
+.nav ul {
+    list-style: none;
+    display: flex;
+    gap: 18px;
+    padding: 0;
+    margin: 0;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #374151;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: all 180ms ease;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.nav a:hover {
+    background: rgba(99,102,241,0.08);
+    color: #4f46e5;
+    transform: translateY(-1px);
+}
+
+.user-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.user-info span {
+    font-size: 14px;
+    color: #374151;
+}
+
+.logout {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(15,23,42,0.06);
+    background: #fff;
+    cursor: pointer;
+    transition: background 150ms ease, transform 150ms ease;
+}
+
+.logout:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+/* Main content container */
+.main-content {
+    padding: 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Ad section */
+.ad-section {
+    background: linear-gradient(90deg, #eef2ff 0%, #fff 100%);
+    height: 470px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 22px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(17,24,39,0.06);
+}
+
+/* If you place an <img> inside ad-section */
+.ad-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Time / search area */
+.time-section {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.time-display {
+    background: #fffff6;
+    padding: 18px;
+    flex: 1 1 300px;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 4px 12px rgba(2,6,23,0.03);
+    font-weight: 700;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+/* Primary search button */
+.search-btn {
+    padding: 12px 20px;
+    background: linear-gradient(90deg, #4f46e5, #6366f1);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(79,70,229,0.18);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    flex: 0 0 220px;
+}
+
+.search-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(79,70,229,0.22);
+}
+
+/* Controls (buttons row) */
+.controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Base style for control buttons */
+.control-btn {
+    background: #fff6f6;
+    padding: 12px 18px;
+    flex: 1 1 180px;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid rgba(15,23,42,0.06);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    box-shadow: 0 4px 12px rgba(2,6,23,0.03);
+}
+
+/* Color variants you can apply alongside .control-btn */
+.control-btn.primary {
+    background: linear-gradient(90deg,#2563eb,#3b82f6);
+    color: #fff;
+    border: none;
+    box-shadow: 0 8px 22px rgba(37,99,235,0.18);
+}
+
+.control-btn.success {
+    background: linear-gradient(90deg,#059669,#10b981);
+    color: #fff;
+    border: none;
+    box-shadow: 0 8px 22px rgba(5,150,105,0.16);
+}
+
+.control-btn.danger {
+    background: linear-gradient(90deg,#ef4444,#f97316);
+    color: #fff;
+    border: none;
+    box-shadow: 0 8px 22px rgba(249,115,22,0.14);
+}
+
+.control-btn:hover {
+    transform: translateY(-4px);
+}
+
+/* Users boxes */
+.users {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.user-box {
+    background: #a200ff;
+    flex: 1 1 140px;
+    padding: 18px;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+    color: white;
+}
+
+.user-box:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(2,6,23,0.06);
+}
+
+/* Utility spacing */
+.mb-4 { margin-bottom: 1rem; }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .ad-section { height: 180px; }
+    .time-display { font-size: 16px; padding: 14px; }
+    .search-btn { flex: 1 1 100%; }
+    .control-btn { flex: 1 1 45%; }
+    .user-box { flex: 1 1 45%; }
+}
+
+
+footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #777;
+    padding: 10px;
+}
+
+/* Base container */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: #111827;
+}
+
+/* Headings */
+.container h1 {
+    font-size: 28px;
+    margin-bottom: 24px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+}
+
+thead {
+    background: #f3f4f6;
+}
+
+thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+tbody td {
+    padding: 12px 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #3730a3;
+}
+
+/* View page (dl) */
+dl {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+    margin-bottom: 24px;
+}
+
+dt {
+    font-weight: 600;
+    color: #374151;
+}
+
+dd {
+    margin: 0;
+    color: #111827;
+}
+
+/* Buttons & links */
+button, .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+}
+
+
+
+/* Back link */
+p a {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+p a:hover {
+    color: #3730a3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    dl {
+        grid-template-columns: 1fr;
+    }
+    table thead {
+        display: none;
+    }
+    table, tbody, tr, td {
+        display: block;
+        width: 100%;
+    }
+    tbody td {
+        padding: 10px 0;
+        border-top: none;
+        border-bottom: 1px solid #e5e7eb;
+        position: relative;
+        padding-left: 120px;
+    }
+    tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 100px;
+        font-weight: 600;
+        color: #374151;
+    }
+}
+
+.errors {
+    background: #ffe5e5;
+    border: 1px solid #ffb3b3;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    color: #cc0000;
+    padding-left: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-actions a {
+    padding: 10px 20px;
+    background: #ccc;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+}

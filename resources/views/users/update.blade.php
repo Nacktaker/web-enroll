@@ -1,47 +1,54 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/users.css') }}">
+
 <div class="container">
-	<h1>Edit User</h1>
+    <h1>Edit User</h1>
 
-	@if($errors->any())
-		<div style="background:#fff5f5;border:1px solid #fbd5d5;padding:8px;margin-bottom:12px;">
-			<ul>
-				@foreach($errors->all() as $error)
-					<li>{{ $error }}</li>
-				@endforeach
-			</ul>
-		</div>
-	@endif
+    @if($errors->any())
+        <div class="errors">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-	<form method="POST" action="{{ route('users.update', $user->id) }}">
-		@csrf
-		@method('PUT')
+    <form method="POST" action="{{ route('users.update', $user->id) }}">
+        @csrf
+        @method('PUT')
 
-		<div>
-			<label for="name">Name</label>
-			<input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required />
-		</div>
+        <div class="form-group">
+            <label for="firstname">First name</label>
+            <input id="firstname" name="firstname" type="text" value="{{ old('firstname', $user->firstname) }}" required />
+        </div>
 
-		<div>
-			<label for="email">Email</label>
-			<input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required />
-		</div>
+        <div class="form-group">
+            <label for="lastname">Last name</label>
+            <input id="lastname" name="lastname" type="text" value="{{ old('lastname', $user->lastname) }}" required />
+        </div>
 
-		<div>
-			<label for="password">Password (leave blank to keep current)</label>
-			<input id="password" name="password" type="password" />
-		</div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required />
+        </div>
 
-		<div>
-			<label for="password_confirmation">Confirm Password</label>
-			<input id="password_confirmation" name="password_confirmation" type="password" />
-		</div>
+        <div class="form-group">
+            <label for="password">Password 	</label>
+            <input id="password" name="password" type="password" />
+        </div>
 
-		<div style="margin-top:12px;">
-			<button type="submit">Save</button>
-			<a href="{{ route('users.view', $user->id) }}">Cancel</a>
-		</div>
-	</form>
+        <div class="form-group">
+            <label for="password_confirmation">Confirm Password</label>
+            <input id="password_confirmation" name="password_confirmation" type="password" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">Save</button>
+            <a href="{{ route('users.view', $user->id) }}">Cancel</a>
+        </div>
+    </form>
 </div>
 @endsection

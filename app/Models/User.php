@@ -71,4 +71,15 @@ class User extends Authenticatable
         // Otherwise hash the plain text password
         $this->attributes['password'] = Hash::make($value);
     }
+
+    /**
+     * Virtual name attribute for backward compatibility with views.
+     * Returns 'firstname lastname' when templates reference $user->name.
+     */
+    public function getNameAttribute()
+    {
+        $first = $this->attributes['firstname'] ?? '';
+        $last = $this->attributes['lastname'] ?? '';
+        return trim($first . ' ' . $last);
+    }
 }
