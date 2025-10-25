@@ -51,6 +51,14 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'nullable|string',
+            'stu_code' => 'required_if:role,STUDENT|nullable|string|max:50|unique:student,stu_code', // บังคับถ้าเป็นนักเรียน, และห้ามซ้ำในตาราง students
+    'faculty' => 'required_if:role,STUDENT|nullable|string|max:255', // บังคับถ้าเป็นนักเรียน
+    'department' => 'nullable|string|max:255', // ไม่บังคับ
+    'year' => 'nullable|integer|min:1|max:8', // ไม่บังคับ (ถ้ากรอกต้องเป็นเลข 1-8)
+
+    // --- ส่วนของ Teacher (บังคับกรอกเมื่อ role=TEACHER) ---
+    'teacher_code' => 'required_if:role,TEACHER|nullable|string|max:50|unique:teachers,teacher_code', // บังคับถ้าเป็นอาจารย์
+    'teacher_faculty' => 'required_if:role,TEACHER|nullable|string|max:255',
         ]);
 
         $user = new User();
@@ -65,27 +73,24 @@ class UserController extends Controller
         $role = $user->role ?? 'STUDENT';
         try {
             if ($role === 'STUDENT') {
-                // Pull optional student-specific fields from request
-                $stuData = [
-                    'u_id' => $user->id,
-                    'stu_code' => $request->input('stu_code'),
-                    'faculty' => $request->input('faculty'),
-                    'department' => $request->input('department'),
-                    'year' => $request->input('year'),
-                ];
-                Student::create(array_filter($stuData, function ($v) { return $v !== null; }));
-            } elseif ($role === 'TEACHER') {
-                $tData = [
-                    'u_id' => $user->id,
-                    'teacher_code' => $request->input('teacher_code'),
-                    'faculty' => $request->input('teacher_faculty') ?? $request->input('faculty'),
-                ];
-                Teacher::create(array_filter($tData, function ($v) { return $v !== null; }));
-            }
+        Student::create([
+            'u_id' => $user->id,
+            'stu_code' => $data['stu_code'] ?? null, // ดึงจาก $data ที่ validate แล้ว
+            'faculty' => $data['faculty'] ?? null,
+            'department' => $data['department'] ?? null,
+            'year' => $data['year'] ?? null,
+        ]);
+    } elseif ($role === 'TEACHER') {
+        Teacher::create([
+            'u_id' => $user->id,
+            'teacher_code' => $data['teacher_code'] ?? null,
+            'faculty' => $data['teacher_faculty'] ?? $data['faculty'] ?? null,
+        ]);
+    }
         } catch (\Throwable $e) {
             // Don't fail user creation if related table/model is missing; log for debugging.
             logger()->error('Failed to create related student/teacher record: ' . $e->getMessage());
-        }
+       }
 
         return redirect()->route('users.list')->with('status', 'User created successfully.');
     }

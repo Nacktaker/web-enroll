@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Subject;
 
 class StudentController extends Controller
 {
@@ -117,4 +118,18 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')->with('status', 'Student deleted');
     }
+        
+    public function showaddsubform() : view
+    {
+        $subjects = Subject::orderBy('id', 'desc')->get();
+
+        return view('students.add-subject-form', compact('subjects'));   
+    }
+
+    public function addsub() 
+    {
+        
+    }
+
+    
 }
