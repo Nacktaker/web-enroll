@@ -8,8 +8,8 @@
             id="add-form-add-sub" method="post">@csrf</form>@endauth
     
 
-    @if($subjects->isEmpty())
-        <p>No students found.</p>
+    @if($pensubjects->isEmpty())
+        <p>No Enrollment found.</p>
     @else
         <table style="width:100%; border-collapse:collapse;">
             <thead>
@@ -24,14 +24,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($subjects as $s)
+                @foreach($pensubjects as $s)
                     <tr style="border-bottom:1px solid #f1f1f1;">
                         <td>{{ $s->subject_id }}</td>
-                            <td>{{ $s->subject_name ?? '' }}</td>
-                            <td>{{ $s->subject_place ?? '' }}</td>
-                            <td>{{ $s->subject_day ?? '' }}</td>
-                            <td>{{ $s->subject_start_time ?? '' }}</td>
-                            <td>{{ $s->subject_end_time ?? '' }}</td>
+                            <td>{{ $s->subject->subject_name ?? '' }}</td>
+                            <td>{{ $s->subject->subject_place ?? '' }}</td>
+                            <td>{{ $s->subject->subject_day ?? '' }}</td>
+                            <td>{{ $s->subject->subject_start_time ?? '' }}</td>
+                            <td>{{ $s->subject->subject_end_time ?? '' }}</td>
                         <td><button type="submit" form="add-form-add-sub" name="sub"
                             value="{{ $s->subject_id }}">Add</button></td>
                     </tr>
@@ -41,7 +41,3 @@
     @endif
 </div>
 @endsection
-
-<?php
-//route('students.add-subject')
-?>

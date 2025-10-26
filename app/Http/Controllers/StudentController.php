@@ -7,6 +7,9 @@ use Illuminate\View\View;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\Pendingregister;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class StudentController extends Controller
 {
@@ -119,17 +122,36 @@ class StudentController extends Controller
         return redirect()->route('students.index')->with('status', 'Student deleted');
     }
         
-    public function showaddsubform() : view
+    public function showaddsubform(Request $request , SubjectController $subjectcontroller , $id) : view
     {
+        $students = Student::find($id);
         $subjects = Subject::orderBy('id', 'desc')->get();
 
-        return view('students.add-subject-form', compact('subjects'));   
+        return view('students.add-subject-form', compact('subjects','students'));   
     }
 
-    public function addsub() 
+    public function addsub(Request $request , $id) 
     {
-        
+        $student = Student::where('u_id', $id)->first();
+        $data = $request->all();
+        $subject = Subject::query()
+            ->where('subject_id', $data['sub'])
+            ->firstOrFail();
+        Pendingregister::create([
+        'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
+        'subject_id' => $subject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
+    ]);
+    return redirect()->back()->with('status', 'Add to Waiting list');
     }
+    public function schedule(Request $request , SubjectController $subjectcontroller , $id) : view
+    {
+        $students = Student::where('u_id', $id)->first();
+        $pensubjects = PendingRegister::where('stu_id', $students->stu_code)
+                                    ->with('subject') 
+                                     ->orderBy('id', 'desc')
+                                     ->get();
 
+        return view('students.schedule', compact('pensubjects','students'));   
+    }
     
 }

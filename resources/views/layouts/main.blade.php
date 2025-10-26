@@ -10,10 +10,11 @@
 <body>
     <header class="header">
     <div class="logo"><a href="{{ url('/home') }}"><img src="https://www.camt.cmu.ac.th/wp-content/uploads/2024/08/logo-camt.svg" alt=""></a></div>
-        <nav class="nav">@auth
-            <ul>
-                <li><a href="{{ route('students.add-subject-form') }}">เพิ่มวิชาเรียน</a></li>
+    @auth<nav class="nav">
+        <ul>
+                <li><a href="{{ route('students.add-subject-form', ['id' => \Auth::user()->id]) }}">เพิ่มวิชาเรียน</a></li>
                 <li><a href="{{ route('subjects.list') }}">ดูวิชาที่เปิดสอบ</a></li>
+                <li><a href="{{ route('students.schedule', ['id' => \Auth::user()->id]) }}">ดูวิชาที่ลงทะเบียนเรียน</a></li>
                 <li><a href="#">ยืนยันลงทะเบียน</a></li>
                 <li><a href="#">ยืนยันการตรวจสอบ</a></li>
             </ul>

@@ -61,14 +61,23 @@ Route::controller(SubjectController::class)
     });
 
     // Students
-    Route::get('/students', [StudentController::class, 'index'])->name('students.list');
-    Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
-    Route::post('/students', [StudentController::class, 'store'])->name('students.store');
-    Route::get('/students/add', [StudentController::class, 'showaddsubform'])->name('students.add-subject-form');
-    Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
-    Route::get('/students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
-    Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
-    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
+    Route::controller(StudentController::class)
+    ->prefix('/students')
+    ->name('students.')
+    ->group(static function (): void {
+    Route::get('', 'index')->name('list');
+    Route::get('/create', 'create')->name('create');
+    Route::post('','store')->name('store');
+    Route::prefix('/{id}')->group(static function (): void {
+        Route::get('', 'show')->name('show');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::put('/update', 'update')->name('update');
+        Route::delete('/delete', 'destroy')->name('destroy');
+        Route::get('/addsubform', 'showaddsubform')->name('add-subject-form');
+        Route::post('/addsub', 'addsub')->name('add-subject');
+        Route::Get('/schedule', 'schedule')->name('schedule');
+    });
+});
     
 // });
 
