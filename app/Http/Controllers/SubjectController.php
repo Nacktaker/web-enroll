@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Subject;
+use App\Models\Teacher;
+use App\Models\User;
 
 class SubjectController extends Controller
 {
     // แสดงรายชื่อวิชา
     public function list(): View
     {
-        $subjects = Subject::orderBy('subject_id')->get();
+       $subjects = Subject::with('teacher.user')
+                           ->orderBy('subject_id')
+                           ->get();
+        
 
         return view('subjects.list', [
             'subjects' => $subjects,

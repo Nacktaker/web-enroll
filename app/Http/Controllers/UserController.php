@@ -57,7 +57,7 @@ class UserController extends Controller
     'year' => 'nullable|integer|min:1|max:8', // ไม่บังคับ (ถ้ากรอกต้องเป็นเลข 1-8)
 
     // --- ส่วนของ Teacher (บังคับกรอกเมื่อ role=TEACHER) ---
-    'teacher_code' => 'required_if:role,TEACHER|nullable|string|max:50|unique:teachers,teacher_code', // บังคับถ้าเป็นอาจารย์
+    'teacher_code' => 'required_if:role,TEACHER|nullable|string|max:50|unique:teacher,teacher_code', // บังคับถ้าเป็นอาจารย์
     'teacher_faculty' => 'required_if:role,TEACHER|nullable|string|max:255',
         ]);
 

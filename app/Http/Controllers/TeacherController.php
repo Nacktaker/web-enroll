@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Pendingregister;
 
 class TeacherController extends Controller
 {
@@ -105,7 +108,34 @@ class TeacherController extends Controller
         $teacher = Teacher::findOrFail($id);
         $teacher->delete();
 
-        return redirect()->route('teachers.index')->with('status', 'Teacher deleted');
+        return redirect()->route('teachers.list')->with('status', 'Teacher deleted');
+    }
+    public function showapproveform(Request $request , SubjectController $subjectcontroller , $id) : view
+    {
+        $teacher = Teacher::find($id);
+        $sub = Subject::query()
+            ->where('teacher_code', $teacher)->get();
+        $subjectIds = $sub->pluck('id');
+        $pen = Pendingregister::whereIn('subject_id', $subjectIds)->get();
+
+        return view('teachers.add-approve-form', compact('teacher','pen'));   
+    }
+    public function addapprove(Request $request , SubjectController $subjectcontroller , $id) : view
+    {
+        $data = $request->all();
+        $subid = $data['sub'];
+        $pending = Pendingregister::findOrFail($subid);
+
+        // 2. สร้าง (ย้ายข้อมูล)
+        StudentSubject::create([
+            'stu_id' => $pending->student_id,
+            'subject_id' => $pending->subject_id,
+        ]);
+
+        // 3. ลบ
+        $pending->delete(); 
+        
+        return redirect()->back()->with('status', 'Add Success');
     }
 
     

@@ -15,6 +15,8 @@ class Teacher extends Model
      */
     protected $table = 'teacher';
 
+    
+
     protected $fillable = [
         'u_id',
         'teacher_code',
@@ -27,5 +29,12 @@ class Teacher extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'u_id');
+    }
+    public function subjects(): HasMany
+    {
+        // ถ้าคอลัมน์ในตาราง subjects คือ 'teacher_id'
+        // Laravel จะรู้ได้เองอัตโนมัติ
+        return $this->hasMany(Subject::class,
+    'teacher_code','teacher_code'); 
     }
 }

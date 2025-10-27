@@ -153,5 +153,13 @@ class StudentController extends Controller
 
         return view('students.schedule', compact('pensubjects','students'));   
     }
+    public function removewaiting(Request $request , $id) 
+    {
+        $data = $request->all();
+        $sid = $data['sub'];
+        $pen = Pendingregister::findorfail($sid);
+        $pen->delete();
+    return redirect()->back()->with('status', 'Add to Waiting list');
     
+}
 }

@@ -2,15 +2,16 @@
 
 @section('content')
 <div class="container">@auth
-    <form action="{{ route('students.add-subject', [
+    <form action="{{ route('students.removewaiting', [
             'id' => \Auth::user()->id]
         ) }}"
-            id="add-form-add-sub" method="post">@csrf</form>@endauth
+            id="add-form-remove-waiting" method="post">@csrf</form>@endauth
     
 
     @if($pensubjects->isEmpty())
         <p>No Enrollment found.</p>
     @else
+        <h3>Waiting List</h3>
         <table style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr style="text-align:left; border-bottom:1px solid #ddd;">
@@ -32,8 +33,8 @@
                             <td>{{ $s->subject->subject_day ?? '' }}</td>
                             <td>{{ $s->subject->subject_start_time ?? '' }}</td>
                             <td>{{ $s->subject->subject_end_time ?? '' }}</td>
-                        <td><button type="submit" form="add-form-add-sub" name="sub"
-                            value="{{ $s->subject_id }}">Add</button></td>
+                        <td><button type="submit" form="add-form-remove-waiting" name="sub"
+                            value="{{ $s->id }}">Add</button></td>
                     </tr>
                 @endforeach
             </tbody>

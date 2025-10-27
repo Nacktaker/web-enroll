@@ -15,7 +15,7 @@
                 <li><a href="{{ route('students.add-subject-form', ['id' => \Auth::user()->id]) }}">เพิ่มวิชาเรียน</a></li>
                 <li><a href="{{ route('subjects.list') }}">ดูวิชาที่เปิดสอบ</a></li>
                 <li><a href="{{ route('students.schedule', ['id' => \Auth::user()->id]) }}">ดูวิชาที่ลงทะเบียนเรียน</a></li>
-                <li><a href="#">ยืนยันลงทะเบียน</a></li>
+                <li><a href="{{ route('teachers.add-approve-form', ['id' => \Auth::user()->id]) }}">ยืนยันลงทะเบียน</a></li>
                 <li><a href="#">ยืนยันการตรวจสอบ</a></li>
             </ul>
         </nav>

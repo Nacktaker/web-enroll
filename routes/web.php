@@ -45,6 +45,8 @@ Route::prefix('auth')->group(function () {
     Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
     Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
     Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
+    Route::get('/teachers/{id}/approveform', [TeacherController::class, 'showapproveform'])->name('teachers.add-approve-form');
+    Route::post('/teachers/{id}/approve', [TeacherController::class, 'addapprove'])->name('teachers.add-approve');
     Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
     Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
@@ -76,6 +78,7 @@ Route::controller(SubjectController::class)
         Route::get('/addsubform', 'showaddsubform')->name('add-subject-form');
         Route::post('/addsub', 'addsub')->name('add-subject');
         Route::Get('/schedule', 'schedule')->name('schedule');
+        Route::post('/waitingdelete', 'removewaiting')->name('removewaiting');
     });
 });
     
@@ -104,4 +107,37 @@ Route::get('/debug-tables', function () {
     }
 
     return response()->json($result);
+});
+Route::get('/debug-teacher', function() {
+    // ---- ใส่ u_id ของครูที่คุณ "มั่นใจ" ว่ามี user ----
+    $test_u_id = 122; // <--- แก้เลข 50 นี้
+    // ------------------------------------------
+
+    echo "<h1>กำลังทดสอบ...</h1>";
+
+    // 1. หาครูด้วย u_id
+    $teacher = App\Models\Teacher::where('u_id', $test_u_id)->first();
+    if (!$teacher) {
+        return "<b>[ล้มเหลว]</b> ไม่เจอครูที่มี u_id = $test_u_id";
+    }
+    echo "<b>[สำเร็จ]</b> 1. เจอครู: " . $teacher->teacher_code . "<br>";
+    echo " - teachers.u_id คือ: " . $teacher->u_id . " (Data Type: " . gettype($teacher->u_id) . ")<br>";
+
+    // 2. หา user ด้วย id
+    $user = App\Models\User::find($test_u_id);
+    if (!$user) {
+        return "<b>[ล้มเหลว]</b> ไม่เจอ User ที่มี id = $test_u_id (นี่คือปัญหา!)";
+    }
+    echo "<b>[สำเร็จ]</b> 2. เจอ User: " . $user->name . "<br>";
+    echo " - users.id คือ: " . $user->id . " (Data Type: " . gettype($user->id) . ")<br>";
+
+    // 3. ทดสอบ Relationship
+    $user_from_relation = $teacher->user;
+
+    if ($user_from_relation) {
+         echo "<b>[สำเร็จ]</b> 3. teacher->user ทำงาน! ชื่อที่ได้คือ: " . $user_from_relation->name;
+    } else {
+         echo "<b>[ล้มเหลว]</b> 3. teacher->user เป็น null <br>";
+         echo "นี่คือจุดที่แปลกมาก เพราะข้อ 1 และ 2 สำเร็จ แต่ Relationship ล้มเหลว";
+    }
 });
