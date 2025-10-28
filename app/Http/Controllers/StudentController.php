@@ -8,6 +8,8 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Subject;
 use App\Models\Pendingregister;
+use App\Models\Pendingwithdraw;
+use App\Models\Studentsubject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -143,16 +145,44 @@ class StudentController extends Controller
     ]);
     return redirect()->back()->with('status', 'Add to Waiting list');
     }
+    public function adddrop(Request $request , $id) 
+    {
+        $student = Student::where('u_id', $id)->first();
+        $data = $request->all();
+        $stusubject = StudentSubject::query()
+            ->where('subject_id', $data['sub'])
+            ->firstOrFail();
+        Pendingwithdraw::create([
+        'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
+        'subject_id' => $stusubject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
+    ]);
+
+    $stusubject->delete();
+
+    return redirect()->back()->with('status', 'Add to Waiting list');
+    }
+
+
     public function schedule(Request $request , SubjectController $subjectcontroller , $id) : view
     {
         $students = Student::where('u_id', $id)->first();
         $pensubjects = PendingRegister::where('stu_id', $students->stu_code)
                                     ->with('subject') 
-                                     ->orderBy('id', 'desc')
-                                     ->get();
+                                    ->orderBy('id', 'desc')
+                                    ->get();
 
-        return view('students.schedule', compact('pensubjects','students'));   
+        $studentsubjects = Studentsubject::where('stu_id', $students->stu_code)
+                                    ->with('subject') 
+                                    ->orderBy('id', 'desc')
+                                    ->get();
+
+
+        return view('students.schedule', compact('pensubjects','students' ,'studentsubjects' ));   
     }
+    
+
+
+   
     public function removewaiting(Request $request , $id) 
     {
         $data = $request->all();
@@ -162,4 +192,6 @@ class StudentController extends Controller
     return redirect()->back()->with('status', 'Add to Waiting list');
     
 }
+
+
 }

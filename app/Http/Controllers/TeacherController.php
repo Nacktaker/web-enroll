@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Teacher;
@@ -9,6 +10,8 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Pendingregister;
+use App\Models\Studentsubject;
+use App\Models\Pendingwithdraw;
 
 class TeacherController extends Controller
 {
@@ -55,7 +58,9 @@ class TeacherController extends Controller
             'u_id' => $user->id,
             'teacher_code' => $data['teacher_code'] ?? null,
             'faculty' => $data['faculty'] ?? null,
-        ], function ($v) { return $v !== null; }));
+        ], function ($v) {
+            return $v !== null;
+        }));
 
         return redirect()->route('teachers.index')->with('status', 'Teacher created');
     }
@@ -99,7 +104,7 @@ class TeacherController extends Controller
     }
 
 
-    
+
     /**
      * Remove the specified teacher.
      */
@@ -110,34 +115,88 @@ class TeacherController extends Controller
 
         return redirect()->route('teachers.list')->with('status', 'Teacher deleted');
     }
-    public function showapproveform(Request $request , SubjectController $subjectcontroller , $id) : view
-    {
-        $teacher = Teacher::find($id);
-        $sub = Subject::query()
-            ->where('teacher_code', $teacher)->get();
-        $subjectIds = $sub->pluck('id');
-        $pen = Pendingregister::whereIn('subject_id', $subjectIds)->get();
+    public function showapproveform(Request $request)
+{
+    $authUser = Auth::user();
+    $teacher = Teacher::where('u_id', $authUser->id)->first();
 
-        return view('teachers.add-approve-form', compact('teacher','pen'));   
+    if (!$teacher) {
+        dd('ไม่เจอ teacher', $authUser);
     }
-    public function addapprove(Request $request , SubjectController $subjectcontroller , $id) : view
-    {
-        $data = $request->all();
-        $subid = $data['sub'];
-        $pending = Pendingregister::findOrFail($subid);
 
-        // 2. สร้าง (ย้ายข้อมูล)
-        StudentSubject::create([
-            'stu_id' => $pending->student_id,
-            'subject_id' => $pending->subject_id,
-        ]);
+    $sub = Subject::where('teacher_code', $teacher->teacher_code)->get();
 
-        // 3. ลบ
-        $pending->delete(); 
-        
-        return redirect()->back()->with('status', 'Add Success');
+    if ($sub->isEmpty()) {
+        dd('ไม่เจอ subject ของครู', $teacher->teacher_code);
     }
+
+    // ใช้ id แทน subject_code
+    $pen = Pendingregister::whereIn('subject_id', $sub->pluck('subject_id'))->get();
 
     
+
+    return view('teachers.add-approve-form', compact('teacher', 'pen'));
 }
-    
+
+
+    public function addapprove(Request $request, $id)
+{
+    // เช็คว่ามีค่า 'sub' หรือไม่
+    if (!$request->has('sub')) {
+        return redirect()->back()->withErrors('Missing sub parameter');
+    }
+    $data = $request->all();
+    $pending = Pendingregister::where('id',$data['sub'])->firstOrFail();
+
+    // สร้างข้อมูลใหม่
+    StudentSubject::create([
+        'stu_id' => $pending->stu_id,
+        'subject_id' => $pending->subject_id,
+    ]);
+
+    // ลบข้อมูลเดิม
+    $pending->delete();
+
+    return redirect()->back()->with('status', 'Add Success');
+}
+
+public function showdropform(Request $request)
+{
+$authUser = Auth::user();
+$teacher = Teacher::where('u_id', $authUser->id)->first();
+
+if (!$teacher) {
+    dd('ไม่เจอ teacher', $authUser);
+}
+
+$sub = Subject::where('teacher_code', $teacher->teacher_code)->get();
+
+if ($sub->isEmpty()) {
+    dd('ไม่เจอ subject ของครู', $teacher->teacher_code);
+}
+
+// ใช้ id แทน subject_code
+$pen = Pendingwithdraw::whereIn('subject_id', $sub->pluck('subject_id'))->get();
+
+
+
+return view('teachers.drop-approve-form', compact('teacher', 'pen'));
+}
+
+
+public function drop(Request $request, $id)
+{
+// เช็คว่ามีค่า 'sub' หรือไม่
+if (!$request->has('sub')) {
+    return redirect()->back()->withErrors('Missing sub parameter');
+}
+$data = $request->all();
+$pending = Pendingwithdraw::where('id',$data['sub'])->firstOrFail();
+
+
+// ลบข้อมูลเดิม
+$pending->delete();
+
+return redirect()->back()->with('status', 'Add Success');
+}
+}

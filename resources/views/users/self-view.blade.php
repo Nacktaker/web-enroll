@@ -1,10 +1,21 @@
+@extends('layouts.main')
+
+@section('content')
+<link rel="stylesheet" href="{{ asset('css/self-view.css') }}">
+
 <div class="box-view">
     <div class="img-self">
-        <img src="" alt="">
+        <img src="{{ $user->profile_image_url ?? asset('images/default-user.png') }}" alt="Profile Picture">
     </div>
+
     <h2>User Details</h2>
     <p><strong>ID:</strong> {{ $user->id }}</p>
-    <p><strong>Name:</strong> {{ $user->name }}</p>
+    <p><strong>Name:</strong> {{ $user->firstname }} {{ $user->lastname }}</p>
     <p><strong>Email:</strong> {{ $user->email }}</p>
-  
+    <p><strong>Role:</strong> {{ ucfirst(strtolower($user->role)) }}</p>
+
+    <div class="button-area">
+        <a href="{{ route('self.update') }}" class="btn-edit">Edit Profile</a>
+    </div>
 </div>
+@endsection

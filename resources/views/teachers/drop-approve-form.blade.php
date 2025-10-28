@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">@auth
-    <form action="{{ route('teachers.add-approve', ['id' => \Auth::user()->id]) }}"id="add-form-add-sub" method="post">@csrf</form>
+    <form action="{{ route('teachers.add-drop', ['id' => \Auth::user()->id]) }}"id="add-form-drop-sub" method="post">@csrf</form>
 
     @endauth
 
@@ -30,7 +30,7 @@
                             <td>{{ $s->subject->subject_day ?? '' }}</td>
                             <td>{{ $s->subject->subject_start_time ?? '' }}</td>
                             <td>{{ $s->subject->subject_end_time ?? '' }}</td>
-                        <td><button type="submit" form="add-form-add-sub" name="sub"
+                        <td><button type="submit" form="add-form-drop-sub" name="sub"
                             value="{{ $s->id }}">Confirm</button></td>
                     </tr>
                 @endforeach

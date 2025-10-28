@@ -32,26 +32,36 @@ Route::prefix('auth')->group(function () {
 
 // Users listing and view (requires authenticated user)
 // Route::middleware(['auth'])->group(function () {
-    Route::get('/users', [UserController::class, 'list'])->name('users.list');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
-    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-    
-    // Teachers
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.list');
-    Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
-    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
-    Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
-    Route::get('/teachers/{id}/approveform', [TeacherController::class, 'showapproveform'])->name('teachers.add-approve-form');
-    Route::post('/teachers/{id}/approve', [TeacherController::class, 'addapprove'])->name('teachers.add-approve');
-    Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
-    Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
-    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
+Route::get('/users', [UserController::class, 'list'])->name('users.list');
+Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+Route::get('/users/{id}', [UserController::class, 'view'])->name('users.view');
+Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+Route::prefix('/self')
+    ->name('self.')
+    ->controller(UserController::class)
+    ->group(static function (): void {
+        Route::get('/view', 'selfview')->name('view');
+        Route::get('/update', 'showSelfUpdateForm')->name('update-form');
+        Route::post('/update', 'selfUpdate')->name('update');
+    });
 
-    //Subject
+// Teachers
+Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.list');
+Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
+Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers.show');
+Route::get('/teachers/{id}/approveform', [TeacherController::class, 'showapproveform'])->name('teachers.add-approve-form');
+Route::post('/teachers/{id}/approve', [TeacherController::class, 'addapprove'])->name('teachers.add-approve');
+Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
+Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
+Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
+route::get('/teachers/{id}/dropform', [TeacherController::class, 'showdropform'])->name('teachers.drop-approve-form');
+route::post('/teachers/{id}/drop', [TeacherController::class, 'drop'])->name('teachers.add-drop');
+
+//Subject
 
 // Group route สำหรับ subject
 Route::controller(SubjectController::class)
@@ -62,33 +72,36 @@ Route::controller(SubjectController::class)
         Route::get('/{subject}', 'view')->name('view');    // Route /subjects/{subject}
     });
 
-    // Students
-    Route::controller(StudentController::class)
+// Students
+Route::controller(StudentController::class)
     ->prefix('/students')
     ->name('students.')
     ->group(static function (): void {
-    Route::get('', 'index')->name('list');
-    Route::get('/create', 'create')->name('create');
-    Route::post('','store')->name('store');
-    Route::prefix('/{id}')->group(static function (): void {
-        Route::get('', 'show')->name('show');
-        Route::get('/edit', 'edit')->name('edit');
-        Route::put('/update', 'update')->name('update');
-        Route::delete('/delete', 'destroy')->name('destroy');
-        Route::get('/addsubform', 'showaddsubform')->name('add-subject-form');
-        Route::post('/addsub', 'addsub')->name('add-subject');
-        Route::Get('/schedule', 'schedule')->name('schedule');
-        Route::post('/waitingdelete', 'removewaiting')->name('removewaiting');
+        Route::get('', 'index')->name('list');
+        Route::get('/create', 'create')->name('create');
+        Route::post('', 'store')->name('store');
+        Route::prefix('/{id}')->group(static function (): void {
+            Route::get('', 'show')->name('show');
+            Route::get('/edit', 'edit')->name('edit');
+            Route::put('/update', 'update')->name('update');
+            Route::delete('/delete', 'destroy')->name('destroy');
+            Route::get('/addsubform', 'showaddsubform')->name('add-subject-form');
+            Route::post('/addsub', 'addsub')->name('add-subject');
+            Route::Get('/schedule', 'schedule')->name('schedule');
+            Route::post('/waitingdelete', 'removewaiting')->name('removewaiting');
+            Route::post('/waitingdrop', 'adddrop')->name('dropwaiting');
+        });
     });
-});
-    
+
 // });
 
 // Temporary debug route: shows whether student(s)/teacher(s) tables exist and row counts
 Route::get('/debug-tables', function () {
     $tables = [
-        'students', 'student',
-        'teachers', 'teacher',
+        'students',
+        'student',
+        'teachers',
+        'teacher',
         'users'
     ];
 
@@ -108,7 +121,7 @@ Route::get('/debug-tables', function () {
 
     return response()->json($result);
 });
-Route::get('/debug-teacher', function() {
+Route::get('/debug-teacher', function () {
     // ---- ใส่ u_id ของครูที่คุณ "มั่นใจ" ว่ามี user ----
     $test_u_id = 122; // <--- แก้เลข 50 นี้
     // ------------------------------------------
@@ -135,9 +148,9 @@ Route::get('/debug-teacher', function() {
     $user_from_relation = $teacher->user;
 
     if ($user_from_relation) {
-         echo "<b>[สำเร็จ]</b> 3. teacher->user ทำงาน! ชื่อที่ได้คือ: " . $user_from_relation->name;
+        echo "<b>[สำเร็จ]</b> 3. teacher->user ทำงาน! ชื่อที่ได้คือ: " . $user_from_relation->name;
     } else {
-         echo "<b>[ล้มเหลว]</b> 3. teacher->user เป็น null <br>";
-         echo "นี่คือจุดที่แปลกมาก เพราะข้อ 1 และ 2 สำเร็จ แต่ Relationship ล้มเหลว";
+        echo "<b>[ล้มเหลว]</b> 3. teacher->user เป็น null <br>";
+        echo "นี่คือจุดที่แปลกมาก เพราะข้อ 1 และ 2 สำเร็จ แต่ Relationship ล้มเหลว";
     }
 });

@@ -152,6 +152,59 @@ class UserController extends Controller
 
         return redirect()->route('users.list')->with('status', 'User deleted.');
     }
+
+        /**
+     * แสดงข้อมูลของผู้ใช้ที่ล็อกอินอยู่ (โปรไฟล์ของตัวเอง)
+     */
+    public function selfview(): View
+    {
+        $user = Auth::user();
+
+
+        return view('users.self-view', compact('user'));
+    }
+
+    /**
+     * แสดงฟอร์มอัปเดตข้อมูลของผู้ใช้ที่ล็อกอินอยู่
+     */
+    public function showSelfUpdateForm(): View
+    {
+        $user = Auth::user();
+        
+        return view('users.self-update', compact('user'));
+    }
+
+    /**
+     * อัปเดตข้อมูลของผู้ใช้ที่ล็อกอินอยู่
+     */
+    public function selfUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in first.');
+        }
+
+        $data = $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
+        $user->email = $data['email'];
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('self.view')->with('status', 'Profile updated successfully.');
+    }
+
 }
             
     

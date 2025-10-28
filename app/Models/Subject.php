@@ -15,6 +15,10 @@ class Subject extends Model
 {
     return $this->belongsToMany(Student::class, 'pending_register','subject_id', 'student_id' );
 }
+    public function studentsubject()
+{
+    return $this->belongsToMany(Student::class, 'pending_register','subject_id', 'student_id' );
+}
 public function student() 
     {
         return $this->belongsToMany(

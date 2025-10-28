@@ -20,9 +20,10 @@ class Pendingregister extends Model
         // ถ้า student_id อ้างอิงถึง 'id' ของ Student (แบบปกติ)
         // return $this->belongsTo(Student::class, 'student_id', 'id');
     }
-    public function subject(): BelongsTo
+    public function subject()
     {
-        // สมมติว่า subject_id อ้างอิงถึง 'id' ของ Subject (แบบปกติ)
         return $this->belongsTo(Subject::class, 'subject_id', 'subject_id');
+        // subject_id = คอลัมน์ใน pendingregisters
+        // subject_code = คอลัมน์ใน subjects
     }
 }

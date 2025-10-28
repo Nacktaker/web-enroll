@@ -16,7 +16,7 @@
                 <li><a href="{{ route('subjects.list') }}">ดูวิชาที่เปิดสอบ</a></li>
                 <li><a href="{{ route('students.schedule', ['id' => \Auth::user()->id]) }}">ดูวิชาที่ลงทะเบียนเรียน</a></li>
                 <li><a href="{{ route('teachers.add-approve-form', ['id' => \Auth::user()->id]) }}">ยืนยันลงทะเบียน</a></li>
-                <li><a href="#">ยืนยันการตรวจสอบ</a></li>
+                <li><a href="{{ route('teachers.drop-approve-form', ['id' => \Auth::user()->id])  }}">ยืนยันการดรอป</a></li>
             </ul>
         </nav>
         <div class="user-info">
@@ -25,8 +25,8 @@
 
                 @csrf
 
-                <a href=""><span>{{ \Auth::user()->name }}</span></a>
-                <span>{{ \Auth::user()->role }}</span>
+                <span><a href="/self/view">{{ \Auth::user()->name }}</a></span>
+                <span> {{ \Auth::user()->role }}</span>
 
                 <button type="submit">Logout</button>
 

@@ -45,4 +45,13 @@ class Student extends Model
             'subject_id'          // 4. Foreign key ในตาราง Pivot ที่อ้างอิงถึง Subject
         );
     }
+    public function studentsubjects()
+    {
+        return $this->belongsToMany(
+            Subject::class,       // 1. โมเดลเป้าหมาย
+            'pending_register',   // 2. ชื่อตาราง Pivot
+            'student_id',         // 3. Foreign key ในตาราง Pivot ที่อ้างอิงถึง Student
+            'subject_id'          // 4. Foreign key ในตาราง Pivot ที่อ้างอิงถึง Subject
+        );
+    }
 }
