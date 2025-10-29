@@ -71,4 +71,30 @@ class UserPolicy
     {
         return $user->isAdministrator() && $user->id !== $model->id;
     }
+
+    /**
+     * Policy check for showing student-specific menu/actions.
+     */
+    public function studentMenu(User $user): bool
+    {
+        $role = $user->role ?? '';
+        return strtolower($role) === 'student';
+    }
+
+    /**
+     * Policy check for showing teacher-specific menu/actions.
+     */
+    public function teacherMenu(User $user): bool
+    {
+        $role = $user->role ?? '';
+        return strtolower($role) === 'teacher';
+    }
+
+    /**
+     * Policy check for showing admin-specific menu/actions.
+     */
+    public function adminMenu(User $user): bool
+    {
+        return $user->isAdministrator();
+    }
 }

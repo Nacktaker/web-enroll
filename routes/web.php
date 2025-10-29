@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EnrollmentSettingsController;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +24,7 @@ Route::post('/create', [\App\Http\Controllers\RegistrationController::class, 'st
 
 Route::get('/home', function () {
     return view('indexs.home');
-});
+})->name('home');
 
 Route::prefix('auth')->group(function () {
     Route::get('/login', [LoginController::class, 'login'])->name('login');
@@ -69,8 +71,17 @@ Route::controller(SubjectController::class)
     ->name('subjects.')
     ->group(function () {
         Route::get('/', 'list')->name('list');            // Route /subjects
+        Route::get('/create', 'create')->name('create');  // show create form
+        Route::post('/create', 'store')->name('store');   // handle create
+    Route::get('/{subject}/students', 'students')->name('students'); // list students for a subject
         Route::get('/{subject}', 'view')->name('view');    // Route /subjects/{subject}
     });
+
+// Enrollment settings routes
+Route::middleware(['auth'])->prefix('settings')->name('settings.')->group(function () {
+    Route::get('/enrollment', [EnrollmentSettingsController::class, 'edit'])->name('enrollment.edit');
+    Route::put('/enrollment', [EnrollmentSettingsController::class, 'update'])->name('enrollment.update');
+});
 
 // Students
 Route::controller(StudentController::class)
@@ -94,6 +105,16 @@ Route::controller(StudentController::class)
     });
 
 // });
+
+// Admin approval routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/add-approve', [AdminController::class, 'showapproveform'])->name('add-approve-form');
+    Route::post('/add-approve/{id}', [AdminController::class, 'addapprove'])->name('addapprove');
+    Route::delete('/add-approve/{id}', [AdminController::class, 'rejectadd'])->name('rejectadd');
+    Route::get('/drop-approve', [AdminController::class, 'showdropform'])->name('drop-approve-form');
+    Route::post('/drop-approve/{id}', [AdminController::class, 'adddrop'])->name('adddrop');
+    Route::delete('/drop-approve/{id}', [AdminController::class, 'rejectdrop'])->name('rejectdrop');
+});
 
 // Temporary debug route: shows whether student(s)/teacher(s) tables exist and row counts
 Route::get('/debug-tables', function () {

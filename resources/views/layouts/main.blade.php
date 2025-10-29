@@ -10,15 +10,28 @@
 <body>
     <header class="header">
     <div class="logo"><a href="{{ url('/home') }}"><img src="https://www.camt.cmu.ac.th/wp-content/uploads/2024/08/logo-camt.svg" alt=""></a></div>
-    @auth<nav class="nav">
+    @auth
+    <nav class="nav">
         <ul>
+            @can('studentMenu', Auth::user())
                 <li><a href="{{ route('students.add-subject-form', ['id' => \Auth::user()->id]) }}">เพิ่มวิชาเรียน</a></li>
                 <li><a href="{{ route('subjects.list') }}">ดูวิชาที่เปิดสอบ</a></li>
                 <li><a href="{{ route('students.schedule', ['id' => \Auth::user()->id]) }}">ดูวิชาที่ลงทะเบียนเรียน</a></li>
+            @endcan
+
+            @can('teacherMenu', Auth::user())
                 <li><a href="{{ route('teachers.add-approve-form', ['id' => \Auth::user()->id]) }}">ยืนยันลงทะเบียน</a></li>
                 <li><a href="{{ route('teachers.drop-approve-form', ['id' => \Auth::user()->id])  }}">ยืนยันการดรอป</a></li>
-            </ul>
-        </nav>
+                <li><a href="{{ route('subjects.create') }}">สร้างวิชา</a></li>
+            @endcan
+
+            @can('adminMenu', Auth::user())
+                <li><a href="{{ route('admin.add-approve-form') }}">จัดการการลงทะเบียน</a></li>
+                <li><a href="{{ route('admin.drop-approve-form') }}">จัดการการดรอป</a></li>
+                <li><a href="{{ route('subjects.create') }}">สร้างวิชา</a></li>
+            @endcan
+        </ul>
+    </nav>
         <div class="user-info">
             
             <form action="{{ route('logout') }}" method="post">

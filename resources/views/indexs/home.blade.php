@@ -40,20 +40,53 @@
 </div>
 
 @php
-    // Calculate the start and end dates
-    $startDate = \Carbon\Carbon::now()->addWeeks(2)->format('d/m/Y');
-    $endDate = \Carbon\Carbon::now()->addWeeks(4)->format('d/m/Y');
+    // Get enrollment period from database
+    $settings = \App\Models\EnrollmentSetting::getCurrentPeriod();
+    $startDate = $settings->start_date->format('d/m/Y');
+    $endDate = $settings->end_date->format('d/m/Y');
 @endphp
 
 <div class="controls">
-    <button class="control-btn">ช่วงเวลารับ: {{ $startDate }}</button>
-    <button class="control-btn">ช่วงเวลาสิ้นสุด: {{ $endDate }}</button>
-    <button class="search-btn"><a href="{{ route('users.create') }}">เพิ่ม User</a></button>
+    @can('adminMenu', Auth::user())
+        <a href="{{ route('settings.enrollment.edit') }}" class="control-btn">
+            ช่วงเวลารับ: {{ $startDate }}
+            <br>
+            <small>(คลิกเพื่อแก้ไข)</small>
+        </a>
+        <a href="{{ route('settings.enrollment.edit') }}" class="control-btn">
+            ช่วงเวลาสิ้นสุด: {{ $endDate }}
+            <br>
+            <small>(คลิกเพื่อแก้ไข)</small>
+        </a>
+    @else
+        <button class="control-btn">ช่วงเวลารับ: {{ $startDate }}</button>
+        <button class="control-btn">ช่วงเวลาสิ้นสุด: {{ $endDate }}</button>
+    @endcan
+    @can('adminMenu', Auth::user())
+        <button class="search-btn"><a href="{{ route('users.create') }}">เพิ่ม User</a></button>
+    @endcan
 </div>
 
-<div class="users">
-    <button class="user-box"><a href="{{ route('students.list') }}">นักศึกษา</a></button>
-    <button class="user-box"><a href="{{ route('teachers.list') }}">อาจารย์</a></button>
-    <button class="user-box"><a href="{{ route('users.list') }}">ผู้ใช้</a></button>
-</div>
+@can('adminMenu', Auth::user())
+    <div class="users">
+        <button class="user-box"><a href="{{ route('students.list') }}">นักศึกษา</a></button>
+        <button class="user-box"><a href="{{ route('teachers.list') }}">อาจารย์</a></button>
+        <button class="user-box"><a href="{{ route('users.list') }}">ผู้ใช้</a></button>
+    </div>
+@endcan
+
+@can('teacherMenu', Auth::user())
+    @php
+        $teacher = \App\Models\Teacher::where('u_id', Auth::id())->with('subjects')->first();
+    @endphp
+    <div class="users">
+        @if($teacher && $teacher->subjects->isNotEmpty())
+            @foreach($teacher->subjects as $sub)
+                <button class="user-box"><a href="{{ route('subjects.students', ['subject' => $sub->subject_id]) }}">{{ $sub->subject_name }}</a></button>
+            @endforeach
+        @else
+            <p>ยังไม่มีวิชาที่สอน</p>
+        @endif
+    </div>
+@endcan
 @endsection

@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+use App\Policies\UserPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Ensure UserPolicy is registered for the User model so Blade @can calls resolve correctly.
+        Gate::policy(User::class, UserPolicy::class);
     }
 }

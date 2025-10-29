@@ -11,6 +11,16 @@ class Subject extends Model
     protected $casts = [
         'teacher_code' => 'string',
     ];
+    protected $fillable = [
+        'subject_id',
+        'subject_name',
+        'subject_place',
+        'subject_day',
+        'subject_start_time',
+        'subject_end_time',
+        'teacher_code',
+        'subject_description',
+    ];
     public function pendingStudents()
 {
     return $this->belongsToMany(Student::class, 'pending_register','subject_id', 'student_id' );
