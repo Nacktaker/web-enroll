@@ -58,6 +58,7 @@ Route::get('/teachers/{id}', [TeacherController::class, 'show'])->name('teachers
 Route::get('/teachers/{id}/approveform', [TeacherController::class, 'showapproveform'])->name('teachers.add-approve-form');
 Route::post('/teachers/{id}/approve', [TeacherController::class, 'addapprove'])->name('teachers.add-approve');
 Route::get('/teachers/{id}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
+Route::get('/teachers/{id}/view-subjects', [TeacherController::class, 'viewSubjects'])->name('teachers.view-subjects');
 Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update');
 Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 route::get('/teachers/{id}/dropform', [TeacherController::class, 'showdropform'])->name('teachers.drop-approve-form');
@@ -101,6 +102,8 @@ Route::controller(StudentController::class)
             Route::Get('/schedule', 'schedule')->name('schedule');
             Route::post('/waitingdelete', 'removewaiting')->name('removewaiting');
             Route::post('/waitingdrop', 'adddrop')->name('dropwaiting');
+            Route::get('/showschedule', 'showschedule')->name('show-schedule');
+            Route::get('/view-subjects', 'viewSubjects')->name('view-subjects');
         });
     });
 

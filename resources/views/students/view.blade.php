@@ -30,7 +30,11 @@
         <dd>{{ $student->year }}</dd>
     </dl>
 
-    <p><a href="{{ route('students.list') }}">Back to list</a> | <a href="{{ route('students.edit', $student->id) }}">Edit</a></p>
+    <p>
+        <a href="{{ session()->get('bookmarks.view', route('students.list')) }}" class="btn btn-secondary">กลับ</a>
+        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">แก้ไข</a>
+        <a href="{{ route('students.view-subjects', $student->id) }}" class="btn btn-primary">ดูรายวิชาที่ลงทะเบียน</a>
+    </p>
     <form method="POST" action="{{ route('students.destroy', $student->id) }}" onsubmit="return confirm('Are you sure you want to delete this student?');">
         @csrf
         @method('DELETE')

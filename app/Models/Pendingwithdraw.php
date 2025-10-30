@@ -14,11 +14,8 @@ class Pendingwithdraw extends Model
     ];
     public function student(): BelongsTo
     {
-        // ถ้า student_id อ้างอิงถึง 'code' ของ Student
-        return $this->belongsTo(Student::class, 'student_id', 'u_id');
-
-        // ถ้า student_id อ้างอิงถึง 'id' ของ Student (แบบปกติ)
-        // return $this->belongsTo(Student::class, 'student_id', 'id');
+        // pendingwithdraw.stu_id stores Student.stu_code — connect accordingly
+        return $this->belongsTo(Student::class, 'stu_id', 'stu_code');
     }
     public function subject()
     {

@@ -17,6 +17,8 @@ class StudentController extends Controller
 {
     public function index(): View
     {
+        session()->put('bookmarks.students.list', request()->fullUrl());
+        
         $students = Student::orderBy('id', 'desc')->get();
 
         return view('students.list', compact('students'));
@@ -134,16 +136,37 @@ class StudentController extends Controller
 
     public function addsub(Request $request , $id) 
     {
-        $student = Student::where('u_id', $id)->first();
+        $student = Student::where('u_id', $id)->firstOrFail();
         $data = $request->all();
         $subject = Subject::query()
             ->where('subject_id', $data['sub'])
             ->firstOrFail();
+
+        // ตรวจสอบว่าผู้เรียนลงทะเบียนรายวิชานี้แล้วหรือยัง (ป้องกันซ้ำ)
+        $already = Studentsubject::where('stu_id', $student->stu_code)
+                    ->where('subject_id', $subject->subject_id)
+                    ->exists();
+
+        if ($already) {
+            return redirect()->back()->with('status', 'คุณได้ลงทะเบียนวิชานี้แล้ว');
+        }
+
+        // ตรวจสอบว่ามีคำขอลงทะเบียนที่รออนุมัติอยู่แล้วหรือไม่
+        $pendingExists = Pendingregister::where('stu_id', $student->stu_code)
+                    ->where('subject_id', $subject->subject_id)
+                    ->exists();
+
+        if ($pendingExists) {
+            return redirect()->back()->with('status', 'คุณได้ส่งคำขอลงทะเบียนวิชานี้แล้ว กรุณารอการอนุมัติ');
+        }
+
+        // สร้างคำขอลงทะเบียนใหม่
         Pendingregister::create([
-        'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
-        'subject_id' => $subject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
-    ]);
-    return redirect()->back()->with('status', 'Add to Waiting list');
+            'stu_id' => $student->stu_code,
+            'subject_id' => $subject->subject_id,
+        ]);
+
+        return redirect()->back()->with('status', 'ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอการอนุมัติ');
     }
     public function adddrop(Request $request , $id) 
     {
@@ -159,7 +182,7 @@ class StudentController extends Controller
 
     $stusubject->delete();
 
-    return redirect()->back()->with('status', 'Add to Waiting list');
+    return redirect()->back()->with('status', 'รายวิชาถูกส่งคำร้องขอถอนแล้ว กรุณารอการอนุมัติ');
     }
 
 
@@ -179,6 +202,27 @@ class StudentController extends Controller
 
         return view('students.schedule', compact('pensubjects','students' ,'studentsubjects' ));   
     }
+
+    public function showschedule(Request $request , SubjectController $subjectcontroller , $id) : view
+    {
+        $students = Student::findOrFail($id);
+        
+        if (!$students) {
+            abort(404, 'Student not found');
+        }
+
+        $pensubjects = PendingRegister::where('stu_id', $students->stu_code)
+                                    ->with('subject') 
+                                    ->orderBy('id', 'desc')
+                                    ->get();
+
+        $studentsubjects = Studentsubject::where('stu_id', $students->stu_code)
+                                    ->with('subject') 
+                                    ->orderBy('id', 'desc')
+                                    ->get();
+
+        return view('students.show-schedule', compact('pensubjects','students' ,'studentsubjects' ));   
+    }
     
 
 
@@ -189,9 +233,23 @@ class StudentController extends Controller
         $sid = $data['sub'];
         $pen = Pendingregister::findorfail($sid);
         $pen->delete();
-    return redirect()->back()->with('status', 'Add to Waiting list');
-    
-}
+        return redirect()->back()->with('status', 'ยกเลิกคำร้องขอลงทะเบียนเรียบร้อยแล้ว');
+    }
 
+    public function viewSubjects($id): View
+    {
+        // Find student and eager load user info
+        $student = Student::with('user')->findOrFail($id);
+        
+        // Get enrolled subjects with their info and teacher info
+        $enrolledSubjects = Studentsubject::where('stu_id', $student->stu_code)
+            ->with(['subject.teacher.user'])
+            ->orderBy('subject_id')
+            ->get();
 
+        return view('students.view-subjects', [
+            'student' => $student,
+            'enrolledSubjects' => $enrolledSubjects
+        ]);
+    }
 }

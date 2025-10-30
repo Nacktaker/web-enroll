@@ -1,6 +1,15 @@
 @extends('layouts.main', ['title' => 'Subjects List'])
 
 @section('content')
+@php
+    session()->put('bookmarks.subjects.list', request()->fullUrl());
+@endphp
+<div class="page-header" style="text-align: center; margin: 20px 0;">
+    <h2 style="color: #333; font-size: 24px;">ดูวิชาที่เปิดสอน</h2>
+</div>
+<div class="mb-3">
+    <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
+</div>
 <table>
     <thead>
         <tr>

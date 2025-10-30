@@ -1,6 +1,12 @@
 @extends('layouts.main')
 @section('content')
+@php
+    session()->put('bookmarks.admin.add-approve', request()->fullUrl());
+@endphp
 <div class="container">
+    <div class="mb-3">
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
+    </div>
     <h2>Pending Subject Registration Approvals</h2>
 
     @if (session('status'))

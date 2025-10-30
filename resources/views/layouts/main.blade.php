@@ -52,6 +52,13 @@
     </header>
 
     <main class="main-content">
+        {{-- Global flash status message --}}
+        @if(session('status'))
+            <div class="flash-status" style="background:#e6f7e6;border:1px solid #b7e0b7;padding:10px;margin:10px 20px;border-radius:4px;color:#2d6a2d;">
+                {{ session('status') }}
+            </div>
+        @endif
+
         @yield('content')
     </main>
 </body>

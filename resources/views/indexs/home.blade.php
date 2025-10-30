@@ -36,7 +36,19 @@
     // ตั้งค่าให้เรียกใช้ฟังก์ชัน updateTime ซ้ำทุกๆ 1 วินาที (1000 ms)
     setInterval(updateTime, 1000);
 </script></div>
-    <button class="search-btn">ค้นหากระบวนวิชาที่เปิดสอบ</button>
+    @php
+        // Get student record for current user
+        $student = null;
+        if (Auth::check() && Auth::user()->role === 'STUDENT') {
+            $student = \App\Models\Student::where('u_id', Auth::id())->first();
+        }
+    @endphp
+
+    @if($student)
+        <button class="search-btn">
+            <a href="{{ route('students.show-schedule', ['id' => $student->id]) }}">ดูตารางเรียน</a>
+        </button>
+    @endif
 </div>
 
 @php

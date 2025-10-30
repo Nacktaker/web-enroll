@@ -24,7 +24,11 @@
         <dd>{{ $teacher->faculty }}</dd>
     </dl>
 
-    <p><a href="{{ route('teachers.list') }}">Back to list</a> | <a href="{{ route('teachers.edit', $teacher->id) }}">Edit</a></p>
+    <p>
+        <a href="{{ session()->get('bookmarks.view', route('teachers.list')) }}" class="btn btn-secondary">กลับ</a>
+        <a href="{{ route('teachers.edit', $teacher->id) }}" class="btn btn-warning">แก้ไข</a>
+        <a href="{{ route('teachers.view-subjects', $teacher->id) }}" class="btn btn-primary">ดูรายวิชาที่สอน</a>
+    </p>
     <form method="POST" action="{{ route('teachers.destroy', $teacher->id) }}" onsubmit="return confirm('Are you sure you want to delete this teacher?');">
         @csrf
         @method('DELETE')

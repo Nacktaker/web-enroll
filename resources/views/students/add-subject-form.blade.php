@@ -1,7 +1,18 @@
 @extends('layouts.main')
 
 @section('content')
-<div class="container">@auth
+@php
+    session()->put('bookmarks.students.add-subject', request()->fullUrl());
+@endphp
+
+<div class="page-header" style="text-align: center; margin: 20px 0;">
+    <div class="mb-3">
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
+    </div>
+    <h2 style="color: #333; font-size: 24px;">เพิ่มวิชาเรียน</h2>
+</div>
+
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">@auth
     <form action="{{ route('students.add-subject', [
             'id' => \Auth::user()->id]
         ) }}"

@@ -5,6 +5,14 @@
     <title>สร้างบัญชี</title>
 </head>
 <body>
+    @php
+        session()->put('bookmarks.users.create', request()->fullUrl());
+    @endphp
+
+    <div style="margin: 10px 0;">
+        <a href="{{ url()->previous() }}" style="display: inline-block; padding: 8px 16px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 4px;">กลับ</a>
+    </div>
+
     <h1>สร้างบัญชี</h1>
 
     @if ($errors->any())

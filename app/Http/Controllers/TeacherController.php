@@ -17,6 +17,8 @@ class TeacherController extends Controller
 {
     public function index(): View
     {
+        session()->put('bookmarks.teachers.list', request()->fullUrl());
+        
         $teachers = Teacher::orderBy('id', 'desc')->get();
 
         return view('teachers.list', compact('teachers'));
@@ -27,6 +29,22 @@ class TeacherController extends Controller
         $teacher = Teacher::findOrFail($id);
 
         return view('teachers.view', compact('teacher'));
+    }
+
+    public function viewSubjects($id): View
+    {
+        // Find teacher and eager load user info
+        $teacher = Teacher::with('user')->findOrFail($id);
+        
+        // Get subjects taught by this teacher
+        $subjects = Subject::where('teacher_code', $teacher->teacher_code)
+            ->orderBy('subject_id')
+            ->get();
+
+        return view('teachers.view-subjects', [
+            'teacher' => $teacher,
+            'subjects' => $subjects
+        ]);
     }
 
     public function create(): View
@@ -130,8 +148,13 @@ class TeacherController extends Controller
         dd('ไม่เจอ subject ของครู', $teacher->teacher_code);
     }
 
-    // ใช้ id แทน subject_code
-    $pen = Pendingregister::whereIn('subject_id', $sub->pluck('subject_id'))->get();
+    // ดึงข้อมูลการลงทะเบียนรอพร้อมข้อมูลนักศึกษาและวิชา
+    $pen = Pendingregister::whereIn('subject_id', $sub->pluck('subject_id'))
+        ->select('pendingregisters.*')
+        ->join('student', 'pendingregisters.stu_id', '=', 'student.stu_code')
+        ->join('users', 'student.u_id', '=', 'users.id')
+        ->with(['subject', 'student.user'])
+        ->get();
 
     
 
@@ -175,10 +198,10 @@ if ($sub->isEmpty()) {
     dd('ไม่เจอ subject ของครู', $teacher->teacher_code);
 }
 
-// ใช้ id แทน subject_code
-$pen = Pendingwithdraw::whereIn('subject_id', $sub->pluck('subject_id'))->get();
-
-
+// ดึงข้อมูลการถอนรอพร้อมข้อมูลนักศึกษาและวิชา
+$pen = Pendingwithdraw::whereIn('subject_id', $sub->pluck('subject_id'))
+    ->with(['subject', 'student.user'])
+    ->get();
 
 return view('teachers.drop-approve-form', compact('teacher', 'pen'));
 }

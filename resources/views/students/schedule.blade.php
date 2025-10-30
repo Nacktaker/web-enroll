@@ -1,6 +1,16 @@
 @extends('layouts.main')
 
 @section('content')
+@php
+    session()->put('bookmarks.students.schedule', request()->fullUrl());
+@endphp
+<div class="page-header" style="text-align: center; margin: 20px 0;">
+    <div class="mb-3">
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
+    </div>
+    <h2 style="color: #333; font-size: 24px;">ดูวิชาที่เปิดสอน</h2>
+</div>
+
 <div class="container">@auth
     <form action="{{ route('students.removewaiting', [
             'id' => \Auth::user()->id]
@@ -13,6 +23,7 @@
             id="add-form-drop-waiting" method="post">@csrf</form>@endauth
 
 
+<table> 
     @if($pensubjects->isEmpty())
         <p>No Enrollment found.</p>
     @else

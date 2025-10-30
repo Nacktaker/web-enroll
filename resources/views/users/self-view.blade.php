@@ -15,6 +15,7 @@
     <p><strong>Role:</strong> {{ ucfirst(strtolower($user->role)) }}</p>
 
     <div class="button-area">
+        <a href="{{ session()->get('bookmarks.view', route('home')) }}" class="btn btn-secondary" style="margin-right:8px;">กลับ</a>
         <a href="{{ route('self.update') }}" class="btn-edit">Edit Profile</a>
     </div>
 </div>

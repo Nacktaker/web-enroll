@@ -1,6 +1,9 @@
 @extends('layouts.main')
 
 @section('content')
+@php
+    session()->put('bookmarks.teachers.edit', request()->fullUrl());
+@endphp
 <div class="container">
     <h1>Edit Teacher</h1>
 
@@ -38,8 +41,8 @@
             <input id="faculty" name="faculty" type="text" value="{{ old('faculty', $teacher->faculty) }}" />
         </div>
         <div style="margin-top:12px;">
-            <button type="submit">Save</button>
-            <a href="{{ route('teachers.show', $teacher->id) }}">Cancel</a>
+            <button type="submit" class="btn btn-primary">บันทึก</button>
+            <a href="{{ session()->get('bookmarks.teachers.view', route('teachers.show', $teacher->id)) }}" class="btn btn-secondary">ยกเลิก</a>
         </div>
     </form>
 </div>
