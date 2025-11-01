@@ -13,15 +13,40 @@ use App\Models\Studentsubject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class StudentController extends Controller
+class StudentController extends SearchableController
 {
-    public function index(): View
+    const MAX_ITEMS = 5;
+
+    #[\Override]
+    function getQuery(): Builder
+    {
+        // Base query for searching students
+        return Student::query()->with('user')->orderBy('id', 'desc');
+    }
+
+    #[\Override]
+    function applyWhereToFilterByTerm(Builder $query, string $word): void
+    {
+        // Search student fields and related user fields
+        $query->where('stu_code', 'LIKE', "%{$word}%")
+            ->orWhere('faculty', 'LIKE', "%{$word}%")
+            ->orWhere('department', 'LIKE', "%{$word}%")
+            ->orWhereHas('user', function ($q) use ($word) {
+                $q->where('firstname', 'LIKE', "%{$word}%")
+                  ->orWhere('lastname', 'LIKE', "%{$word}%")
+                  ->orWhere('email', 'LIKE', "%{$word}%");
+            });
+    }
+    public function index(Request $request): View
     {
         session()->put('bookmarks.students.list', request()->fullUrl());
-        
-        $students = Student::orderBy('id', 'desc')->get();
 
-        return view('students.list', compact('students'));
+        $criteria = $this->prepareCriteria($request->query());
+        $query = $this->search($criteria);
+
+        $students = $query->paginate(self::MAX_ITEMS)->appends(['term' => $criteria['term']]);
+
+        return view('students.list', compact('students', 'criteria'));
     }
 
     public function show($id): View
@@ -68,7 +93,9 @@ class StudentController extends Controller
             'year' => $data['year'] ?? null,
         ];
 
-        Student::create(array_filter($stuData, function ($v) { return $v !== null; }));
+        Student::create(array_filter($stuData, function ($v) {
+            return $v !== null;
+        }));
 
         return redirect()->route('students.index')->with('status', 'Student created');
     }
@@ -125,16 +152,42 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')->with('status', 'Student deleted');
     }
-        
-    public function showaddsubform(Request $request , SubjectController $subjectcontroller , $id) : view
-    {
-        $students = Student::find($id);
-        $subjects = Subject::orderBy('id', 'desc')->get();
 
-        return view('students.add-subject-form', compact('subjects','students'));   
+    public function showaddsubform(
+        Request $request,
+        SubjectController $subjectcontroller,
+        $id
+    ): View {
+    // Load the student by the authenticated user's id (u_id) or by provided user id.
+    // Many places in the views pass the Auth::user()->id as the {id} route param,
+    // so treat the incoming $id as a user id (u_id) and resolve the Student record.
+    $students = Student::where('u_id', $id)->firstOrFail();
+        $subjects = Subject::orderBy('id', 'desc')->get();
+        $query = $subjectcontroller
+            ->getQuery()
+            ->whereDoesntHave(
+                'students',
+                function (Builder $innerQuery) use ($students) {
+                        // The pivot stores the student's code in 'stu_id' and the Student model's
+                        // column is 'stu_code'. When filtering the related Student query, match
+                        // against the student's 'stu_code'.
+                        return $innerQuery->where('stu_code', $students->stu_code);
+                    },
+            );
+    // Use Laravel Request->query() to get query parameters (getQueryParams() is PSR-7 and not available on Illuminate\Http\Request)
+    $criteria = $subjectcontroller->prepareCriteria($request->query());
+        $query = $subjectcontroller
+            ->filter($query, $criteria)
+            ->withCount('students');
+
+        return view('students.add-subject-form',
+        [ 'criteria' => $criteria,
+            'student' => $students,
+            'subjects' => $query->paginate($subjectcontroller::MAX_ITEMS),]
+        , compact('subjects', 'students'));
     }
 
-    public function addsub(Request $request , $id) 
+    public function addsub(Request $request, $id)
     {
         $student = Student::where('u_id', $id)->firstOrFail();
         $data = $request->all();
@@ -144,8 +197,8 @@ class StudentController extends Controller
 
         // ตรวจสอบว่าผู้เรียนลงทะเบียนรายวิชานี้แล้วหรือยัง (ป้องกันซ้ำ)
         $already = Studentsubject::where('stu_id', $student->stu_code)
-                    ->where('subject_id', $subject->subject_id)
-                    ->exists();
+            ->where('subject_id', $subject->subject_id)
+            ->exists();
 
         if ($already) {
             return redirect()->back()->with('status', 'คุณได้ลงทะเบียนวิชานี้แล้ว');
@@ -153,8 +206,8 @@ class StudentController extends Controller
 
         // ตรวจสอบว่ามีคำขอลงทะเบียนที่รออนุมัติอยู่แล้วหรือไม่
         $pendingExists = Pendingregister::where('stu_id', $student->stu_code)
-                    ->where('subject_id', $subject->subject_id)
-                    ->exists();
+            ->where('subject_id', $subject->subject_id)
+            ->exists();
 
         if ($pendingExists) {
             return redirect()->back()->with('status', 'คุณได้ส่งคำขอลงทะเบียนวิชานี้แล้ว กรุณารอการอนุมัติ');
@@ -168,7 +221,7 @@ class StudentController extends Controller
 
         return redirect()->back()->with('status', 'ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอการอนุมัติ');
     }
-    public function adddrop(Request $request , $id) 
+    public function adddrop(Request $request, $id)
     {
         $student = Student::where('u_id', $id)->first();
         $data = $request->all();
@@ -176,58 +229,58 @@ class StudentController extends Controller
             ->where('subject_id', $data['sub'])
             ->firstOrFail();
         Pendingwithdraw::create([
-        'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
-        'subject_id' => $stusubject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
-    ]);
+            'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
+            'subject_id' => $stusubject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
+        ]);
 
-    $stusubject->delete();
+        $stusubject->delete();
 
-    return redirect()->back()->with('status', 'รายวิชาถูกส่งคำร้องขอถอนแล้ว กรุณารอการอนุมัติ');
+        return redirect()->back()->with('status', 'รายวิชาถูกส่งคำร้องขอถอนแล้ว กรุณารอการอนุมัติ');
     }
 
 
-    public function schedule(Request $request , SubjectController $subjectcontroller , $id) : view
+    public function schedule(Request $request, SubjectController $subjectcontroller, $id): view
     {
         $students = Student::where('u_id', $id)->first();
         $pensubjects = PendingRegister::where('stu_id', $students->stu_code)
-                                    ->with('subject') 
-                                    ->orderBy('id', 'desc')
-                                    ->get();
+            ->with('subject')
+            ->orderBy('id', 'desc')
+            ->get();
 
         $studentsubjects = Studentsubject::where('stu_id', $students->stu_code)
-                                    ->with('subject') 
-                                    ->orderBy('id', 'desc')
-                                    ->get();
+            ->with('subject')
+            ->orderBy('id', 'desc')
+            ->get();
 
 
-        return view('students.schedule', compact('pensubjects','students' ,'studentsubjects' ));   
+        return view('students.schedule', compact('pensubjects', 'students', 'studentsubjects'));
     }
 
-    public function showschedule(Request $request , SubjectController $subjectcontroller , $id) : view
+    public function showschedule(Request $request, SubjectController $subjectcontroller, $id): view
     {
         $students = Student::findOrFail($id);
-        
+
         if (!$students) {
             abort(404, 'Student not found');
         }
 
         $pensubjects = PendingRegister::where('stu_id', $students->stu_code)
-                                    ->with('subject') 
-                                    ->orderBy('id', 'desc')
-                                    ->get();
+            ->with('subject')
+            ->orderBy('id', 'desc')
+            ->get();
 
         $studentsubjects = Studentsubject::where('stu_id', $students->stu_code)
-                                    ->with('subject') 
-                                    ->orderBy('id', 'desc')
-                                    ->get();
+            ->with('subject')
+            ->orderBy('id', 'desc')
+            ->get();
 
-        return view('students.show-schedule', compact('pensubjects','students' ,'studentsubjects' ));   
+        return view('students.show-schedule', compact('pensubjects', 'students', 'studentsubjects'));
     }
-    
 
 
-   
-    public function removewaiting(Request $request , $id) 
+
+
+    public function removewaiting(Request $request, $id)
     {
         $data = $request->all();
         $sid = $data['sub'];
@@ -240,7 +293,7 @@ class StudentController extends Controller
     {
         // Find student and eager load user info
         $student = Student::with('user')->findOrFail($id);
-        
+
         // Get enrolled subjects with their info and teacher info
         $enrolledSubjects = Studentsubject::where('stu_id', $student->stu_code)
             ->with(['subject.teacher.user'])

@@ -9,17 +9,37 @@ use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
-class UserController extends Controller
+class UserController extends SearchableController
 {
+    const MAX_ITEMS = 15;
+
+    #[\Override]
+    function getQuery(): Builder
+    {
+        return User::query()->orderBy('id', 'desc');
+    }
+
+    #[\Override]
+    function applyWhereToFilterByTerm(Builder $query, string $word): void
+    {
+        $query->where('firstname', 'LIKE', "%{$word}%")
+            ->orWhere('lastname', 'LIKE', "%{$word}%")
+            ->orWhere('email', 'LIKE', "%{$word}%")
+            ->orWhere('role', 'LIKE', "%{$word}%");
+    }
     /**
      * Display a listing of users.
      */
     public function list(Request $request): View
     {
-        $users = User::orderBy('id', 'desc')->get();
+        $criteria = $this->prepareCriteria($request->query());
+        $query = $this->search($criteria);
 
-        return view('users.list', compact('users'));
+        $users = $query->paginate(self::MAX_ITEMS)->appends(['term' => $criteria['term']]);
+
+        return view('users.list', compact('users', 'criteria'));
     }
 
     /**

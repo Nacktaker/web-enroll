@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\Teacher;
 
-class RegistrationController extends Controller
+abstract class RegistrationController extends SearchableController
 {
     public function store(Request $request)
     {

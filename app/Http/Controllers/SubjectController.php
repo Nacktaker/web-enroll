@@ -8,24 +8,42 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
 
-class SubjectController extends Controller
+class SubjectController extends SearchableController
 {
     // แสดงรายชื่อวิชา
-    public function list(): View
+    const MAX_ITEMS = 5;
+
+    #[\Override]
+    function getQuery(): Builder
     {
-       $subjects = Subject::with('teacher.user')
-                           ->orderBy('subject_id')
-                           ->get();
-        
+        return Subject::orderBy('subject_id');
+    }
+    #[\Override]
+    function applyWhereToFilterByTerm(Builder $query, string $word): void
+    {
+        parent::applyWhereToFilterByTerm($query, $word);
+
+        $query->orWhere('subject_id', 'LIKE', "%{$word}%");
+    }
+    // แสดงรายชื่อวิชา
+    public function list(Request $request): View
+    {
+        $criteria = $this->prepareCriteria($request->query());
+        $query = $this->search($criteria);
+        $subjects = Subject::with('teacher.user')
+            ->orderBy('subject_id')
+            ->get();
+
 
         return view('subjects.list', [
-            'subjects' => $subjects,
+            'criteria' => $criteria,
+            'subjects' => $query->paginate(self::MAX_ITEMS),
         ]);
     }
-
     // แสดงรายละเอียดวิชา
     public function view(string $subject): View
     {

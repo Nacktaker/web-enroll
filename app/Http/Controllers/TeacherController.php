@@ -13,15 +13,38 @@ use App\Models\Pendingregister;
 use App\Models\Studentsubject;
 use App\Models\Pendingwithdraw;
 
-class TeacherController extends Controller
+class TeacherController extends SearchableController
 {
-    public function index(): View
+    const MAX_ITEMS = 10;
+
+    #[\Override]
+    function getQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return Teacher::query()->with('user')->orderBy('id', 'desc');
+    }
+
+    #[\Override]
+    function applyWhereToFilterByTerm(\Illuminate\Database\Eloquent\Builder $query, string $word): void
+    {
+        // Search teacher fields and related user (firstname/lastname/email)
+        $query->where('teacher_code', 'LIKE', "%{$word}%")
+            ->orWhere('faculty', 'LIKE', "%{$word}%")
+            ->orWhereHas('user', function ($q) use ($word) {
+                $q->where('firstname', 'LIKE', "%{$word}%")
+                  ->orWhere('lastname', 'LIKE', "%{$word}%")
+                  ->orWhere('email', 'LIKE', "%{$word}%");
+            });
+    }
+    public function index(Request $request): View
     {
         session()->put('bookmarks.teachers.list', request()->fullUrl());
-        
-        $teachers = Teacher::orderBy('id', 'desc')->get();
 
-        return view('teachers.list', compact('teachers'));
+        $criteria = $this->prepareCriteria($request->query());
+        $query = $this->search($criteria);
+
+        $teachers = $query->paginate(self::MAX_ITEMS)->appends(['term' => $criteria['term']]);
+
+        return view('teachers.list', compact('teachers', 'criteria'));
     }
 
     public function show($id): View

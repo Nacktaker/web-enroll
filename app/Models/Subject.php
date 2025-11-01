@@ -50,4 +50,25 @@ public function student()
     //    เช่น 'teacher' หรือ 'teacher_code' คุณต้องระบุเอง
     // return $this->belongsTo(Teacher::class, 'teacher_code'); 
 }
+
+        /**
+         * Students enrolled in this subject.
+         *
+         * There is a pivot table named `studentsubject` with columns:
+         *  - subject_id (references subjects.subject_id)
+         *  - stu_id (stores the student's stu_code)
+         *
+         * We map the pivot accordingly: pivot (subject_id, stu_id) -> (subjects.subject_id, student.stu_code).
+         */
+        public function students()
+        {
+            return $this->belongsToMany(
+                Student::class,
+                'studentsubject',    // pivot table
+                'subject_id',         // foreign key on pivot referencing this Subject
+                'stu_id',             // related key on pivot referencing Student (stores stu_code)
+                'subject_id',         // local key on subjects table
+                'stu_code'            // local key on students table
+            );
+        }
 }

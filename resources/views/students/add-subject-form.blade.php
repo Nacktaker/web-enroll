@@ -1,18 +1,23 @@
 @extends('layouts.main')
 
 @section('content')
-@php
-    session()->put('bookmarks.students.add-subject', request()->fullUrl());
-@endphp
+<search>
+    <form action="{{ route('students.add-subject-form', ['id' => \Auth::user()->id]) }}" method="get" class="app-cmp-search-form">
+        <div class="app-cmp-form-detail">
+            <label for="app-criteria-term">Search</label>
+            <input type="text" id="app-criteria-term" name="term" value="{{ $criteria['term'] }}" />
+        </div>
 
-<div class="page-header" style="text-align: center; margin: 20px 0;">
-    <div class="mb-3">
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
-    </div>
-    <h2 style="color: #333; font-size: 24px;">เพิ่มวิชาเรียน</h2>
-</div>
-
-<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">@auth
+        <div class="app-cmp-form-actions">
+            <button type="submit" class="primary">Search</button>
+            <a href="{{ route('students.add-subject-form', ['id' => \Auth::user()->id]) }}">
+                <button type="button" class="accent">X</button>
+            </a>
+        </div>
+    </form>
+</search>
+<h2 style="align-items: center;">เพิ่มวิชาเรียน</h2>
+<div class="container">@auth
     <form action="{{ route('students.add-subject', [
             'id' => \Auth::user()->id]
         ) }}"
