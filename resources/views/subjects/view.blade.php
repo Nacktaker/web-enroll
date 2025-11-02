@@ -4,12 +4,9 @@
 ])
 
 @section('content')
-@php
-    session()->put('bookmarks.subjects.view', request()->fullUrl());
-@endphp
 
 <div class="mb-3">
-    <a href="{{ session()->get('bookmarks.subjects.list', route('subjects.list')) }}" class="btn btn-secondary">กลับ</a>
+    <a href="{{ session()->get('bookmarks.subjects.view', route('subjects.list')) }}" class="btn btn-secondary">กลับ</a>
 </div>
 
 <h1>SUBJECT DETAILS</h1>

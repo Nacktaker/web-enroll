@@ -59,6 +59,11 @@
 @endphp
 
 <div class="controls">
+    @php
+    session()->put('bookmarks.teachers.list', request()->fullUrl());
+    session()->put('bookmarks.students.list', request()->fullUrl());
+    session()->put('bookmarks.users.list', request()->fullUrl());
+    @endphp
     @can('adminMenu', Auth::user())
         <a href="{{ route('settings.enrollment.edit') }}" class="control-btn">
             ช่วงเวลารับ: {{ $startDate }}

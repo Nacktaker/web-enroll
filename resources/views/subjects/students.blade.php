@@ -4,6 +4,9 @@
 
 @section('content')
 <div class="container">
+    <div class="mb-3">
+        <a href="{{ route('subjects.view', ['subject' => $subject->subject_id]) }}" class="btn btn-secondary">กลับ</a>
+    </div>
     <h2>รายชื่อนักศึกษาที่ลงวิชา: {{ $subject->subject_name }} ({{ $subject->subject_id }})</h2>
 
     @if($students->isEmpty())

@@ -27,14 +27,18 @@
         <dd>{{ $user->updated_at }}</dd>
     </dl>
 
-    <button><a href="{{ url('/users') }}">Back to list</a></button>
-    <a href="{{ route('users.edit', $user->id) }}">
-    <button type="button">Edit User</button>
-</a>
-    <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');">
-        @csrf
-        @method('DELETE')
-        <button type="submit" style="color:#c00;">Delete User</button>
-    </form>
+    <button><a href="{{ session()->get('bookmarks.view', route('users.list')) }}">Back to list</a></button>
+
+    @can('adminMenu', Auth::user())
+        <a href="{{ route('users.edit', $user->id) }}">
+            <button type="button">Edit User</button>
+        </a>
+
+        <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display:inline-block;margin-left:8px;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" style="color:#c00;">Delete User</button>
+        </form>
+    @endcan
 </div>
 @endsection

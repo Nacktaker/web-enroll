@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Database\QueryException;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\Student;
@@ -37,6 +39,7 @@ class TeacherController extends SearchableController
     }
     public function index(Request $request): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         session()->put('bookmarks.teachers.list', request()->fullUrl());
 
         $criteria = $this->prepareCriteria($request->query());
@@ -49,6 +52,7 @@ class TeacherController extends SearchableController
 
     public function show($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $teacher = Teacher::findOrFail($id);
 
         return view('teachers.view', compact('teacher'));
@@ -56,11 +60,19 @@ class TeacherController extends SearchableController
 
     public function viewSubjects($id): View
     {
+        // allow admin or the teacher themselves
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('teacherMenu', Auth::user());
+        }
         // Find teacher and eager load user info
         $teacher = Teacher::with('user')->findOrFail($id);
         
         // Get subjects taught by this teacher
         $subjects = Subject::where('teacher_code', $teacher->teacher_code)
+            // include a count of enrolled students (via Subject::students relation)
+            ->withCount(['students as studentsubjects_count'])
             ->orderBy('subject_id')
             ->get();
 
@@ -72,11 +84,13 @@ class TeacherController extends SearchableController
 
     public function create(): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         return view('teachers.add');
     }
 
     public function store(Request $request)
     {
+        Gate::authorize('adminMenu', Auth::user());
         $data = $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
@@ -85,29 +99,36 @@ class TeacherController extends SearchableController
             'faculty' => 'nullable|string|max:64',
         ]);
 
-        // Create linked user
-        $user = User::create([
-            'firstname' => $data['firstname'],
-            'lastname' => $data['lastname'],
-            'email' => $data['email'],
-            'password' => bcrypt(str()->random(12)),
-            'role' => 'TEACHER',
-        ]);
+        try {
+            // Create linked user
+            $user = User::create([
+                'firstname' => $data['firstname'],
+                'lastname' => $data['lastname'],
+                'email' => $data['email'],
+                'password' => bcrypt(str()->random(12)),
+                'role' => 'TEACHER',
+            ]);
 
-        // Create teacher record
-        Teacher::create(array_filter([
-            'u_id' => $user->id,
-            'teacher_code' => $data['teacher_code'] ?? null,
-            'faculty' => $data['faculty'] ?? null,
-        ], function ($v) {
-            return $v !== null;
-        }));
+            // Create teacher record
+            Teacher::create(array_filter([
+                'u_id' => $user->id,
+                'teacher_code' => $data['teacher_code'] ?? null,
+                'faculty' => $data['faculty'] ?? null,
+            ], function ($v) {
+                return $v !== null;
+            }));
 
-        return redirect()->route('teachers.index')->with('status', 'Teacher created');
+            return redirect()->route('teachers.index')->with('status', 'Teacher created');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
     public function edit($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $teacher = Teacher::findOrFail($id);
 
         return view('teachers.update', compact('teacher'));
@@ -115,6 +136,7 @@ class TeacherController extends SearchableController
 
     public function update(Request $request, $id)
     {
+        Gate::authorize('adminMenu', Auth::user());
         $teacher = Teacher::findOrFail($id);
 
         $data = $request->validate([
@@ -125,23 +147,29 @@ class TeacherController extends SearchableController
             'faculty' => 'nullable|string|max:64',
         ]);
 
-        // Update linked user
-        if ($teacher->u_id) {
-            $user = User::find($teacher->u_id);
-            if ($user) {
-                $user->firstname = $data['firstname'];
-                $user->lastname = $data['lastname'];
-                $user->email = $data['email'];
-                $user->save();
+        try {
+            // Update linked user
+            if ($teacher->u_id) {
+                $user = User::find($teacher->u_id);
+                if ($user) {
+                    $user->firstname = $data['firstname'];
+                    $user->lastname = $data['lastname'];
+                    $user->email = $data['email'];
+                    $user->save();
+                }
             }
+
+            $teacher->update([
+                'teacher_code' => $data['teacher_code'] ?? $teacher->teacher_code,
+                'faculty' => $data['faculty'] ?? $teacher->faculty,
+            ]);
+
+            return redirect()->route('teachers.show', $teacher->id)->with('status', 'Teacher updated');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
         }
-
-        $teacher->update([
-            'teacher_code' => $data['teacher_code'] ?? $teacher->teacher_code,
-            'faculty' => $data['faculty'] ?? $teacher->faculty,
-        ]);
-
-        return redirect()->route('teachers.show', $teacher->id)->with('status', 'Teacher updated');
     }
 
 
@@ -150,15 +178,26 @@ class TeacherController extends SearchableController
      * Remove the specified teacher.
      */
     public function destroy($id)
-    {
-        $teacher = Teacher::findOrFail($id);
-        $teacher->delete();
+    {    $teacher = Teacher::find($id);
+        Gate::authorize('adminMenu', Auth::user());
+        try {
+            $user = User::where('id', $teacher->u_id)->first();
 
-        return redirect()->route('teachers.list')->with('status', 'Teacher deleted');
+            $teacher->delete();
+            if ($user) {
+                $user->delete();
+            }
+            return redirect()->route('teachers.list')->with('status', 'Teacher deleted');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
     public function showapproveform(Request $request)
 {
-    $authUser = Auth::user();
+        Gate::authorize('teacherMenu', Auth::user());
+        $authUser = Auth::user();
     $teacher = Teacher::where('u_id', $authUser->id)->first();
 
     if (!$teacher) {
@@ -187,6 +226,7 @@ class TeacherController extends SearchableController
 
     public function addapprove(Request $request, $id)
 {
+    Gate::authorize('teacherMenu', Auth::user());
     // เช็คว่ามีค่า 'sub' หรือไม่
     if (!$request->has('sub')) {
         return redirect()->back()->withErrors('Missing sub parameter');
@@ -194,20 +234,27 @@ class TeacherController extends SearchableController
     $data = $request->all();
     $pending = Pendingregister::where('id',$data['sub'])->firstOrFail();
 
-    // สร้างข้อมูลใหม่
-    StudentSubject::create([
-        'stu_id' => $pending->stu_id,
-        'subject_id' => $pending->subject_id,
-    ]);
+    try {
+        // สร้างข้อมูลใหม่
+        StudentSubject::create([
+            'stu_id' => $pending->stu_id,
+            'subject_id' => $pending->subject_id,
+        ]);
 
-    // ลบข้อมูลเดิม
-    $pending->delete();
+        // ลบข้อมูลเดิม
+        $pending->delete();
 
-    return redirect()->back()->with('status', 'Add Success');
+        return redirect()->back()->with('status', 'Add Success');
+    } catch (QueryException $excp) {
+        return redirect()->back()->withErrors([
+            'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+        ]);
+    }
 }
 
 public function showdropform(Request $request)
 {
+    Gate::authorize('teacherMenu', Auth::user());
 $authUser = Auth::user();
 $teacher = Teacher::where('u_id', $authUser->id)->first();
 
@@ -232,6 +279,7 @@ return view('teachers.drop-approve-form', compact('teacher', 'pen'));
 
 public function drop(Request $request, $id)
 {
+    Gate::authorize('teacherMenu', Auth::user());
 // เช็คว่ามีค่า 'sub' หรือไม่
 if (!$request->has('sub')) {
     return redirect()->back()->withErrors('Missing sub parameter');
@@ -240,9 +288,15 @@ $data = $request->all();
 $pending = Pendingwithdraw::where('id',$data['sub'])->firstOrFail();
 
 
-// ลบข้อมูลเดิม
-$pending->delete();
+    try {
+        // ลบข้อมูลเดิม
+        $pending->delete();
 
-return redirect()->back()->with('status', 'Add Success');
+        return redirect()->back()->with('status', 'Add Success');
+    } catch (QueryException $excp) {
+        return redirect()->back()->withErrors([
+            'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+        ]);
+    }
 }
 }

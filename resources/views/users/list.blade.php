@@ -6,7 +6,7 @@
 @endphp
 <div class="container">
     <div class="mb-3">
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
+        <a href="{{ route('home') }}" class="btn btn-secondary">กลับ</a>
     </div>
     <h1>Users</h1>
     <form action="{{ route('users.list') }}" method="get" style="margin-bottom:10px;">

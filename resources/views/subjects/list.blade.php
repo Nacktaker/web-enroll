@@ -2,7 +2,9 @@
 
 @section('content')
 @php
-session()->put('bookmarks.subjects.list', request()->fullUrl());
+// Store current URL for back navigation from view and create pages
+session()->put('bookmarks.subjects.view', url()->full());
+session()->put('bookmarks.subjects.create', url()->full());
 @endphp
 <search>
     <form action="{{ route('subjects.list') }}" method="get" class="app-cmp-search-form">

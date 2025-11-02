@@ -12,6 +12,8 @@ use App\Models\Pendingregister;
 use App\Models\Pendingwithdraw;
 use App\Models\StudentSubject;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -20,6 +22,7 @@ class AdminController extends Controller
      */
     public function showapproveform(): View
     {
+    Gate::authorize('adminMenu', Auth::user());
         // Get all pending registrations with related data
         $pen = Pendingregister::with([
             'student.user',
@@ -34,6 +37,7 @@ class AdminController extends Controller
      */
     public function showdropform(): View
     {
+    Gate::authorize('adminMenu', Auth::user());
         // Get all pending withdrawals with related data
         $pen = Pendingwithdraw::with([
             'student.user',
@@ -48,6 +52,7 @@ class AdminController extends Controller
      */
     public function addapprove(Request $request, $id)
     {
+    Gate::authorize('adminMenu', Auth::user());
         DB::beginTransaction();
         try {
             $data = $request->all();
@@ -76,6 +81,7 @@ class AdminController extends Controller
      */
     public function dropApprove(Request $request, $id)
     {
+    Gate::authorize('adminMenu', Auth::user());
         try {
             $pending = Pendingregister::findOrFail($id);
             $pending->delete();
@@ -91,6 +97,7 @@ class AdminController extends Controller
      */
     public function confirmDrop(Request $request, $id)
     {
+    Gate::authorize('adminMenu', Auth::user());
         DB::beginTransaction();
         try {
             $pending = Pendingwithdraw::findOrFail($id);
@@ -117,6 +124,7 @@ class AdminController extends Controller
      */
     public function rejectDrop(Request $request, $id)
     {
+        Gate::authorize('adminMenu', Auth::user());
         try {
             $pending = Pendingwithdraw::findOrFail($id);
             $pending->delete();

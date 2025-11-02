@@ -6,18 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
 use App\Models\EnrollmentSetting;
+use Illuminate\Database\QueryException;
 
 class EnrollmentSettingsController extends Controller
 {
     public function edit(): View
     {
-        $user = Auth::user();
-        
-        if (!($user && strtolower($user->role) === 'admin')) {
-            abort(403);
-        }
+        Gate::authorize('adminMenu', Auth::user());
 
         // Get current enrollment period
         $settings = EnrollmentSetting::getCurrentPeriod();
@@ -30,23 +28,25 @@ class EnrollmentSettingsController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        
-        if (!($user && strtolower($user->role) === 'admin')) {
-            abort(403);
-        }
+        Gate::authorize('adminMenu', Auth::user());
 
         $data = $request->validate([
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
         ]);
 
-        // Update enrollment period in database
-        EnrollmentSetting::create([
-            'start_date' => $data['start_date'],
-            'end_date' => $data['end_date'],
-        ]);
-        
-        return redirect()->route('home')->with('status', 'ตั้งค่าช่วงเวลาลงทะเบียนเรียบร้อย');
+        try {
+            // Update enrollment period in database
+            EnrollmentSetting::create([
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+            ]);
+
+            return redirect()->route('home')->with('status', 'ตั้งค่าช่วงเวลาลงทะเบียนเรียบร้อย');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 }

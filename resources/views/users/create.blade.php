@@ -3,6 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>สร้างบัญชี</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+
+    
 </head>
 <body>
     @php
@@ -10,7 +14,7 @@
     @endphp
 
     <div style="margin: 10px 0;">
-        <a href="{{ url()->previous() }}" style="display: inline-block; padding: 8px 16px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 4px;">กลับ</a>
+        <a href="{{ route('home') }}" style="display: inline-block; padding: 8px 16px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 4px;">กลับ</a>
     </div>
 
     <h1>สร้างบัญชี</h1>
