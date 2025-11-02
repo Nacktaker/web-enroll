@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\Student;
@@ -98,6 +99,10 @@ class TeacherController extends SearchableController
             'teacher_code' => 'nullable|string|max:64',
             'faculty' => 'nullable|string|max:64',
         ]);
+
+        $rules = [
+            'teacher_code' => [Rule::unique('teacher_code', '$data->teacher_code')],
+        ];
 
         try {
             // Create linked user
@@ -292,7 +297,7 @@ $pending = Pendingwithdraw::where('id',$data['sub'])->firstOrFail();
         // ลบข้อมูลเดิม
         $pending->delete();
 
-        return redirect()->back()->with('status', 'Add Success');
+        return redirect()->back()->with('status', 'Drop Success');
     } catch (QueryException $excp) {
         return redirect()->back()->withErrors([
             'error' => $excp->errorInfo[2] ?? $excp->getMessage(),

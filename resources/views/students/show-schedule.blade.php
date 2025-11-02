@@ -51,7 +51,7 @@
 @endif
 
     <div style="margin-top: 20px;">
-        <a href="{{ session()->get('bookmarks.students.view', route('students.show', ['id' => $students->id])) }}" class="btn btn-secondary">กลับ</a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
     </div>
 </div>
 

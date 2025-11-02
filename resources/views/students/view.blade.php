@@ -48,7 +48,7 @@
             }
         @endphp
 
-        <a href="{{ $backUrl }}" class="btn btn-secondary">กลับ</a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">กลับ</a>
 
         @can('adminMenu', Auth::user())
             <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">แก้ไข</a>

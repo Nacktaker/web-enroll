@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
 
 class StudentController extends SearchableController
 {
@@ -55,7 +56,11 @@ class StudentController extends SearchableController
 
     public function show($id): View
     {
-        Gate::authorize('adminMenu', Auth::user());
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('teacherMenu', Auth::user());
+        }
         $student = Student::findOrFail($id);
 
         return view('students.view', compact('student'));

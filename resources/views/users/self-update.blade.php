@@ -4,6 +4,10 @@
 <div class="box-view">
     <h2>Edit Profile</h2>
 
+    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+
     <form method="POST" action="{{ route('self.update') }}">
         @csrf
         <div>

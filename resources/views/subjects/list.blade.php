@@ -59,4 +59,7 @@ session()->put('bookmarks.subjects.create', url()->full());
         @endforeach
     </tbody>
 </table>
+<div style="margin-top:12px;">
+            {{ $subjects->links() }}
+        </div>
 @endsection

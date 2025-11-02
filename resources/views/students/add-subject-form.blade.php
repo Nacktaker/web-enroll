@@ -54,6 +54,9 @@
                 @endforeach
             </tbody>
         </table>
+        <div style="margin-top:12px;">
+            {{ $subjects->links() }}
+        </div>
     @endif
 </div>
 @endsection

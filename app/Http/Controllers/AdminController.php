@@ -61,7 +61,7 @@ class AdminController extends Controller
 
             // Create the approved enrollment
             StudentSubject::create([
-                'stu_id' => $pending->student_id,
+                'stu_id' => $pending->stu_id,
                 'subject_id' => $pending->subject_id,
             ]);
 
@@ -79,7 +79,7 @@ class AdminController extends Controller
     /**
      * Reject a subject registration
      */
-    public function dropApprove(Request $request, $id)
+    public function rejectadd(Request $request, $id)
     {
     Gate::authorize('adminMenu', Auth::user());
         try {
@@ -127,6 +127,8 @@ class AdminController extends Controller
         Gate::authorize('adminMenu', Auth::user());
         try {
             $pending = Pendingwithdraw::findOrFail($id);
+            
+            
             $pending->delete();
             
             return redirect()->back()->with('status', 'Withdrawal rejected');
