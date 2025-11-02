@@ -9,6 +9,8 @@ use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends SearchableController
@@ -27,13 +29,16 @@ class UserController extends SearchableController
         $query->where('firstname', 'LIKE', "%{$word}%")
             ->orWhere('lastname', 'LIKE', "%{$word}%")
             ->orWhere('email', 'LIKE', "%{$word}%")
-            ->orWhere('role', 'LIKE', "%{$word}%");
+            ->orWhere('role', 'LIKE', "%{$word}%")
+            ->orWhere('id', 'LIKE', "%{$word}%")
+            ;
     }
     /**
      * Display a listing of users.
      */
     public function list(Request $request): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $criteria = $this->prepareCriteria($request->query());
         $query = $this->search($criteria);
 
@@ -47,6 +52,7 @@ class UserController extends SearchableController
      */
     public function view($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $user = User::findOrFail($id);
 
         return view('users.view', compact('user'));
@@ -57,6 +63,7 @@ class UserController extends SearchableController
      */
     public function create(): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         return view('users.create');
     }
 
@@ -65,6 +72,7 @@ class UserController extends SearchableController
      */
     public function store(Request $request)
     {
+        Gate::authorize('adminMenu', Auth::user());
         $data = $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
@@ -81,38 +89,39 @@ class UserController extends SearchableController
     'teacher_faculty' => 'required_if:role,TEACHER|nullable|string|max:255',
         ]);
 
-        $user = new User();
-        $user->firstname = $data['firstname'];
-        $user->lastname = $data['lastname'];
-        $user->email = $data['email'];
-        $user->password = Hash::make($data['password']);
-        $user->role = isset($data['role']) ? strtoupper($data['role']) : ($request->input('role') ? strtoupper($request->input('role')) : 'STUDENT');
-        $user->save();
-
-        // If the role indicates a student or teacher, create the linked record as well.
-        $role = $user->role ?? 'STUDENT';
         try {
-            if ($role === 'STUDENT') {
-        Student::create([
-            'u_id' => $user->id,
-            'stu_code' => $data['stu_code'] ?? null, // ดึงจาก $data ที่ validate แล้ว
-            'faculty' => $data['faculty'] ?? null,
-            'department' => $data['department'] ?? null,
-            'year' => $data['year'] ?? null,
-        ]);
-    } elseif ($role === 'TEACHER') {
-        Teacher::create([
-            'u_id' => $user->id,
-            'teacher_code' => $data['teacher_code'] ?? null,
-            'faculty' => $data['teacher_faculty'] ?? $data['faculty'] ?? null,
-        ]);
-    }
-        } catch (\Throwable $e) {
-            // Don't fail user creation if related table/model is missing; log for debugging.
-            logger()->error('Failed to create related student/teacher record: ' . $e->getMessage());
-       }
+            $user = new User();
+            $user->firstname = $data['firstname'];
+            $user->lastname = $data['lastname'];
+            $user->email = $data['email'];
+            $user->password = Hash::make($data['password']);
+            $user->role = isset($data['role']) ? strtoupper($data['role']) : ($request->input('role') ? strtoupper($request->input('role')) : 'STUDENT');
+            $user->save();
 
-        return redirect()->route('users.list')->with('status', 'User created successfully.');
+            // If the role indicates a student or teacher, create the linked record as well.
+            $role = $user->role ?? 'STUDENT';
+            if ($role === 'STUDENT') {
+                Student::create([
+                    'u_id' => $user->id,
+                    'stu_code' => $data['stu_code'] ?? null,
+                    'faculty' => $data['faculty'] ?? null,
+                    'department' => $data['department'] ?? null,
+                    'year' => $data['year'] ?? null,
+                ]);
+            } elseif ($role === 'TEACHER') {
+                Teacher::create([
+                    'u_id' => $user->id,
+                    'teacher_code' => $data['teacher_code'] ?? null,
+                    'faculty' => $data['teacher_faculty'] ?? $data['faculty'] ?? null,
+                ]);
+            }
+
+            return redirect()->route('users.list')->with('status', 'User created successfully.');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -120,6 +129,7 @@ class UserController extends SearchableController
      */
     public function edit($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $user = User::findOrFail($id);
 
         return view('users.update', compact('user'));
@@ -130,6 +140,7 @@ class UserController extends SearchableController
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('adminMenu', Auth::user());
         $user = User::findOrFail($id);
         $data = $request->validate([
             'firstname' => 'required|string|max:255',
@@ -151,26 +162,37 @@ class UserController extends SearchableController
             $user->role = strtoupper($data['role']);
         }
 
-        $user->save();
-
-        return redirect()->route('users.view', $user->id)->with('status', 'User updated successfully.');
+        try {
+            $user->save();
+            return redirect()->route('users.view', $user->id)->with('status', 'User updated successfully.');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
     /**
      * Remove the specified user.
      */
     public function destroy($id)
-    {
-        $user = User::findOrFail($id);
+    {    
+        Gate::authorize('adminMenu', Auth::user());
+        try {
+            $user = User::findOrFail($id);
 
-        // Prevent deleting the currently authenticated user
-        if (Auth::check() && Auth::id() === $user->id) {
-            return redirect()->route('users.view', $user->id)->with('status', 'You cannot delete your own account.');
+            // Prevent deleting the currently authenticated user
+            if (Auth::check() && Auth::id() === $user->id) {
+                return redirect()->route('users.view', $user->id)->with('status', 'You cannot delete your own account.');
+            }
+
+            $user->delete();
+            return redirect()->route('users.list')->with('status', 'User deleted.');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
         }
-
-        $user->delete();
-
-        return redirect()->route('users.list')->with('status', 'User deleted.');
     }
 
         /**
@@ -220,9 +242,14 @@ class UserController extends SearchableController
             $user->password = Hash::make($data['password']);
         }
 
-        $user->save();
-
-        return redirect()->route('self.view')->with('status', 'Profile updated successfully.');
+        try {
+            $user->save();
+            return redirect()->route('self.view')->with('status', 'Profile updated successfully.');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
 }

@@ -36,12 +36,7 @@
                                             <td>{{ $subject->subject_name }}</td>
                                             <td>{{ $subject->credit }}</td>
                                             <td>{{ $subject->studentsubjects_count ?? 0 }}</td>
-                                            <td>
-                                                <a href="{{ route('subjects.view', $subject->id) }}" 
-                                                   class="btn btn-primary btn-sm">
-                                                    ดูรายละเอียด
-                                                </a>
-                                            </td>
+                                           
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -52,7 +47,7 @@
             </div>
 
             <div class="mt-3">
-                <a href="{{ session()->get('bookmarks.view', route('teachers.show', $teacher->id)) }}" class="btn btn-secondary">
+                <a href="{{ session()->get('bookmarks.view.subjects', route('teachers.show', $teacher->id)) }}" class="btn btn-secondary">
                     กลับ
                 </a>
             </div>

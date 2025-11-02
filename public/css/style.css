@@ -35,6 +35,7 @@ body {
     margin: 0;
 }
 
+
 .nav a {
     text-decoration: none;
     color: #374151;
@@ -140,6 +141,10 @@ body {
     transition: transform 150ms ease, box-shadow 150ms ease;
     flex: 0 0 220px;
 }
+.search-btn a{
+    color: white;
+    text-decoration: none;
+}
 
 .search-btn:hover {
     transform: translateY(-3px);
@@ -215,6 +220,10 @@ body {
     font-weight: 700;
     transition: transform 150ms ease, box-shadow 150ms ease;
     color: white;
+}
+.user-box a{
+    color: rgb(230, 255, 255);
+    text-decoration: none;
 }
 
 .user-box:hover {

@@ -12,6 +12,9 @@ use App\Models\Pendingwithdraw;
 use App\Models\Studentsubject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class StudentController extends SearchableController
 {
@@ -39,6 +42,7 @@ class StudentController extends SearchableController
     }
     public function index(Request $request): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         session()->put('bookmarks.students.list', request()->fullUrl());
 
         $criteria = $this->prepareCriteria($request->query());
@@ -51,6 +55,7 @@ class StudentController extends SearchableController
 
     public function show($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $student = Student::findOrFail($id);
 
         return view('students.view', compact('student'));
@@ -58,11 +63,13 @@ class StudentController extends SearchableController
 
     public function create(): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         return view('students.add');
     }
 
     public function store(Request $request)
     {
+        Gate::authorize('adminMenu', Auth::user());
         // Validate incoming student + user fields
         $data = $request->validate([
             'firstname' => 'required|string|max:255',
@@ -74,34 +81,41 @@ class StudentController extends SearchableController
             'year' => 'nullable|string|max:4',
         ]);
 
-        // Create a linked User first
-        $user = User::create([
-            'firstname' => $data['firstname'],
-            'lastname' => $data['lastname'],
-            'email' => $data['email'],
-            // generate a random password if none provided (admins can reset later)
-            'password' => bcrypt(str()->random(12)),
-            'role' => 'STUDENT',
-        ]);
+        try {
+            // Create a linked User first
+            $user = User::create([
+                'firstname' => $data['firstname'],
+                'lastname' => $data['lastname'],
+                'email' => $data['email'],
+                // generate a random password if none provided (admins can reset later)
+                'password' => bcrypt(str()->random(12)),
+                'role' => 'STUDENT',
+            ]);
 
-        // Create the student record and link to user
-        $stuData = [
-            'u_id' => $user->id,
-            'stu_code' => $data['stu_code'] ?? null,
-            'faculty' => $data['faculty'] ?? null,
-            'department' => $data['department'] ?? null,
-            'year' => $data['year'] ?? null,
-        ];
+            // Create the student record and link to user
+            $stuData = [
+                'u_id' => $user->id,
+                'stu_code' => $data['stu_code'] ?? null,
+                'faculty' => $data['faculty'] ?? null,
+                'department' => $data['department'] ?? null,
+                'year' => $data['year'] ?? null,
+            ];
 
-        Student::create(array_filter($stuData, function ($v) {
-            return $v !== null;
-        }));
+            Student::create(array_filter($stuData, function ($v) {
+                return $v !== null;
+            }));
 
-        return redirect()->route('students.index')->with('status', 'Student created');
+            return redirect()->route('students.index')->with('status', 'Student created');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
     public function edit($id): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $student = Student::findOrFail($id);
 
         return view('students.update', compact('student'));
@@ -109,6 +123,7 @@ class StudentController extends SearchableController
 
     public function update(Request $request, $id)
     {
+        Gate::authorize('adminMenu', Auth::user());
         $student = Student::findOrFail($id);
 
         $data = $request->validate([
@@ -121,43 +136,67 @@ class StudentController extends SearchableController
             'year' => 'nullable|string|max:4',
         ]);
 
-        // Update linked user if present
-        if ($student->u_id) {
-            $user = User::find($student->u_id);
-            if ($user) {
-                $user->firstname = $data['firstname'];
-                $user->lastname = $data['lastname'];
-                $user->email = $data['email'];
-                $user->save();
+        try {
+            // Update linked user if present
+            if ($student->u_id) {
+                $user = User::find($student->u_id);
+                if ($user) {
+                    $user->firstname = $data['firstname'];
+                    $user->lastname = $data['lastname'];
+                    $user->email = $data['email'];
+                    $user->save();
+                }
             }
+
+            $student->update([
+                'stu_code' => $data['stu_code'] ?? $student->stu_code,
+                'faculty' => $data['faculty'] ?? $student->faculty,
+                'department' => $data['department'] ?? $student->department,
+                'year' => $data['year'] ?? $student->year,
+            ]);
+
+            return redirect()->route('students.show', $student->id)->with('status', 'Student updated');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
         }
-
-        $student->update([
-            'stu_code' => $data['stu_code'] ?? $student->stu_code,
-            'faculty' => $data['faculty'] ?? $student->faculty,
-            'department' => $data['department'] ?? $student->department,
-            'year' => $data['year'] ?? $student->year,
-        ]);
-
-        return redirect()->route('students.show', $student->id)->with('status', 'Student updated');
     }
 
     /**
      * Remove the specified student.
      */
-    public function destroy($id)
+    public function destroy($u_id)
     {
-        $student = Student::findOrFail($id);
-        $student->delete();
+        Gate::authorize('adminMenu', Auth::user());
+       try {
+           $student = Student::find($u_id);
+           $user = User::where('id', $student->u_id)->first();
 
-        return redirect()->route('students.index')->with('status', 'Student deleted');
-    }
+           $student->delete();
+           if ($user) {
+               $user->delete();
+           }
+
+           return redirect()->route('students.list')->with('status', 'Student deleted');
+       } catch (QueryException $excp) {
+           return redirect()->back()->withErrors([
+               'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+           ]);
+       }
+}
 
     public function showaddsubform(
         Request $request,
         SubjectController $subjectcontroller,
         $id
     ): View {
+        // allow admin or the student themselves
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('studentMenu', Auth::user());
+        }
     // Load the student by the authenticated user's id (u_id) or by provided user id.
     // Many places in the views pass the Auth::user()->id as the {id} route param,
     // so treat the incoming $id as a user id (u_id) and resolve the Student record.
@@ -210,16 +249,22 @@ class StudentController extends SearchableController
             ->exists();
 
         if ($pendingExists) {
-            return redirect()->back()->with('status', 'คุณได้ส่งคำขอลงทะเบียนวิชานี้แล้ว กรุณารอการอนุมัติ');
+            return redirect()->back()->with('status1', 'คุณได้ส่งคำขอลงทะเบียนวิชานี้แล้ว กรุณารอการอนุมัติ');
         }
 
-        // สร้างคำขอลงทะเบียนใหม่
-        Pendingregister::create([
-            'stu_id' => $student->stu_code,
-            'subject_id' => $subject->subject_id,
-        ]);
+        try {
+            // สร้างคำขอลงทะเบียนใหม่
+            Pendingregister::create([
+                'stu_id' => $student->stu_code,
+                'subject_id' => $subject->subject_id,
+            ]);
 
-        return redirect()->back()->with('status', 'ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอการอนุมัติ');
+            return redirect()->back()->with('status', 'ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอการอนุมัติ');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
     public function adddrop(Request $request, $id)
     {
@@ -228,14 +273,20 @@ class StudentController extends SearchableController
         $stusubject = StudentSubject::query()
             ->where('subject_id', $data['sub'])
             ->firstOrFail();
-        Pendingwithdraw::create([
-            'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
-            'subject_id' => $stusubject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
-        ]);
+        try {
+            Pendingwithdraw::create([
+                'stu_id' => $student->stu_code, // ใช้ $student->code ตามตรรกะเดิมของคุณ
+                'subject_id' => $stusubject->subject_id     // ใช้ id (Primary Key) ของ subject ที่หาเจอ
+            ]);
 
-        $stusubject->delete();
+            $stusubject->delete();
 
-        return redirect()->back()->with('status', 'รายวิชาถูกส่งคำร้องขอถอนแล้ว กรุณารอการอนุมัติ');
+            return redirect()->back()->with('status', 'รายวิชาถูกส่งคำร้องขอถอนแล้ว กรุณารอการอนุมัติ');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
 

@@ -31,14 +31,37 @@
     </dl>
 
     <p>
-        <a href="{{ session()->get('bookmarks.view', route('students.list')) }}" class="btn btn-secondary">กลับ</a>
-        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">แก้ไข</a>
-        <a href="{{ route('students.view-subjects', $student->id) }}" class="btn btn-primary">ดูรายวิชาที่ลงทะเบียน</a>
+        @php
+            
+            $backUrl = session()->get('bookmarks.view', route('students.list'));
+
+            
+            if (Auth::check() && strtolower((string) (Auth::user()->role ?? '')) === 'teacher') {
+               
+                $subjectCode = session()->get('bookmarks.subject');
+                if (!empty($subjectCode)) {
+                    $backUrl = route('subjects.students', ['subject' => $subjectCode]);
+                } else {
+                    
+                    $backUrl = url()->previous();
+                }
+            }
+        @endphp
+
+        <a href="{{ $backUrl }}" class="btn btn-secondary">กลับ</a>
+
+        @can('adminMenu', Auth::user())
+            <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">แก้ไข</a>
+            <a href="{{ route('students.view-subjects', $student->id) }}" class="btn btn-primary">ดูรายวิชาที่ลงทะเบียน</a>
+        @endcan
+        
     </p>
-    <form method="POST" action="{{ route('students.destroy', $student->id) }}" onsubmit="return confirm('Are you sure you want to delete this student?');">
-        @csrf
-        @method('DELETE')
-        <button type="submit" style="color:#c00;">Delete Student</button>
-    </form>
+
+    @can('adminMenu', Auth::user())
+        <form method="POST" action="{{ route('students.destroy', $student->id) }}" onsubmit="return confirm('Are you sure you want to delete this student?');">
+            @csrf
+            <button type="submit" style="color:#c00;">Delete Student</button>
+        </form>
+    @endcan
 </div>
 @endsection

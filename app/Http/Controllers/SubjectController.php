@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\QueryException;
 
 class SubjectController extends SearchableController
 {
@@ -32,6 +34,7 @@ class SubjectController extends SearchableController
     // แสดงรายชื่อวิชา
     public function list(Request $request): View
     {
+        $user = Auth::user();
         $criteria = $this->prepareCriteria($request->query());
         $query = $this->search($criteria);
         $subjects = Subject::with('teacher.user')
@@ -47,6 +50,7 @@ class SubjectController extends SearchableController
     // แสดงรายละเอียดวิชา
     public function view(string $subject): View
     {
+        Gate::authorize('adminMenu', Auth::user());
         $subject = Subject::where('subject_id', $subject)->firstOrFail();
 
         return view('subjects.view', [
@@ -59,12 +63,14 @@ class SubjectController extends SearchableController
      */
     public function create(): View
     {
-        $user = Auth::user();
-
-        // Only teachers and admins may access
-        if (!($user && (strtolower($user->role) === 'teacher' || strtolower($user->role) === 'admin'))) {
-            abort(403);
+        // allow admin or teacher
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('teacherMenu', Auth::user());
         }
+
+        $user = Auth::user();
 
         $teachers = [];
         // If admin, provide teacher list for selection
@@ -90,10 +96,13 @@ class SubjectController extends SearchableController
      */
     public function store(Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        if (!($user && (strtolower($user->role) === 'teacher' || strtolower($user->role) === 'admin'))) {
-            abort(403);
+        // allow admin or teacher
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('teacherMenu', Auth::user());
         }
+        $user = Auth::user();
 
         $rules = [
             'subject_id' => ['required', 'string', 'max:50', Rule::unique('subjects', 'subject_id')],
@@ -120,7 +129,8 @@ class SubjectController extends SearchableController
             $data['teacher_code'] = $teacher->teacher_code;
         }
 
-        Subject::create([
+        try {
+            Subject::create([
             'subject_id' => $data['subject_id'],
             'subject_name' => $data['subject_name'],
             'subject_description' => $data['subject_description'] ?? null,
@@ -130,8 +140,14 @@ class SubjectController extends SearchableController
             'subject_end_time' => $data['subject_end_time'] ?? null,
             'teacher_code' => $data['teacher_code'],
         ]);
-
-        return redirect()->route('subjects.list')->with('status', 'Subject created successfully.');
+            return redirect(
+                session()->get('bookmarks.subjects.create', route('subjects.list'))
+            )->with('status', 'Subject created successfully.');
+        } catch (QueryException $excp) {
+            return redirect()->back()->withInput()->withErrors([
+                'error' => $excp->errorInfo[2] ?? $excp->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -139,6 +155,13 @@ class SubjectController extends SearchableController
      */
     public function students(string $subject): View
     {
+        // allow admin or teacher
+        try {
+            Gate::authorize('adminMenu', Auth::user());
+        } catch (\Exception $e) {
+            Gate::authorize('teacherMenu', Auth::user());
+        }
+
         $user = Auth::user();
 
         $subjectModel = Subject::where('subject_id', $subject)->firstOrFail();
@@ -159,6 +182,13 @@ class SubjectController extends SearchableController
         $students = \App\Models\Student::whereIn('stu_code', $studentCodes)
             ->with('user')
             ->get();
+
+        // Save a bookmark for this subject so teachers can return here from a student view
+        try {
+            session()->put('bookmarks.subject', $subjectModel->subject_id);
+        } catch (\Exception $e) {
+            // Session may not be available in some contexts; ignore silently
+        }
 
         return view('subjects.students', [
             'subject' => $subjectModel,

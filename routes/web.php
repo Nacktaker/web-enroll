@@ -96,7 +96,7 @@ Route::controller(StudentController::class)
             Route::get('', 'show')->name('show');
             Route::get('/edit', 'edit')->name('edit');
             Route::put('/update', 'update')->name('update');
-            Route::delete('/delete', 'destroy')->name('destroy');
+            Route::post('/delete', 'destroy')->name('destroy');
             Route::get('/addsubform', 'showaddsubform')->name('add-subject-form');
             Route::post('/addsub', 'addsub')->name('add-subject');
             Route::Get('/schedule', 'schedule')->name('schedule');

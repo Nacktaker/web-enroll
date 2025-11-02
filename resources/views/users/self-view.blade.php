@@ -3,10 +3,7 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/self-view.css') }}">
 
-<div class="box-view">
-    <div class="img-self">
-        <img src="{{ $user->profile_image_url ?? asset('images/default-user.png') }}" alt="Profile Picture">
-    </div>
+
 
     <h2>User Details</h2>
     <p><strong>ID:</strong> {{ $user->id }}</p>
